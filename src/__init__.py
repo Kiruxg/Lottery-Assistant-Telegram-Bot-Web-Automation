@@ -1,0 +1,1 @@
+# Lottery Assistant Package

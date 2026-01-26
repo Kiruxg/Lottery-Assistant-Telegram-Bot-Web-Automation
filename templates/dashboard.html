@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Lottery Assistant Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .header .timestamp {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .games-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .game-card {
+                padding: 20px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .game-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .ev-badge {
+                align-self: flex-start;
+            }
+
+            .jackpot {
+                font-size: 2em;
+            }
+
+            .metrics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .threshold-info {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .game-card {
+                padding: 15px;
+            }
+
+            .jackpot {
+                font-size: 1.8em;
+            }
+
+            .metrics {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+        }
+
+        .game-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            gap: 10px;
+        }
+
+        .game-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+            flex: 1;
+        }
+
+        .ev-badge {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .ev-positive {
+            background: #10b981;
+            color: white;
+        }
+
+        .ev-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .ev-negative {
+            background: #ef4444;
+            color: white;
+        }
+
+        /* New EV Tier System */
+        /* EV Tier System - Gradient colors for better visual distinction */
+        .ev-anomaly {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .ev-positive-small {
+            background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+            color: white;
+            box-shadow: 0 2px 6px rgba(52, 211, 153, 0.2);
+        }
+
+        .ev-neutral {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: white;
+            box-shadow: 0 2px 6px rgba(251, 191, 36, 0.2);
+        }
+
+        .ev-bad {
+            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+            color: white;
+            box-shadow: 0 2px 6px rgba(245, 158, 11, 0.2);
+        }
+
+        .ev-terrible {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
+        }
+
+        .jackpot {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 15px 0;
+        }
+
+        .change {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+
+        .change.positive {
+            color: #10b981;
+        }
+
+        .change.negative {
+            color: #ef4444;
+        }
+
+        .change.neutral {
+            color: #666;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .metric {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .metric-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .metric-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .threshold-info {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .threshold-info h4 {
+            margin-bottom: 10px;
+            color: #856404;
+        }
+
+        .threshold-info p {
+            color: #856404;
+            font-size: 0.9em;
+        }
+
+        .history-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .history-section h2 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .history-item {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-game {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .history-threshold {
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .history-time {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+            font-size: 1.2em;
+        }
+
+        .skeleton-loader {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+            min-height: 400px;
+            position: relative;
+        }
+
+        .skeleton-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            opacity: 1;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .skeleton-line {
+            height: 20px;
+            background: linear-gradient(90deg, #e0e0e0 25%, #c0c0c0 50%, #e0e0e0 75%);
+            background-size: 200% 100%;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            animation: shimmer 1.5s infinite;
+        }
+
+        .skeleton-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .skeleton-line.game-name {
+            height: 1.5em;
+            width: 60%;
+            margin-bottom: 0;
+        }
+
+        .skeleton-line.ev-badge {
+            height: 1.8em;
+            width: 140px;
+            border-radius: 20px;
+            margin-bottom: 0;
+        }
+
+        .skeleton-line.jackpot {
+            height: 2.5em;
+            width: 200px;
+            margin: 15px 0;
+        }
+
+        .skeleton-line.change {
+            height: 1.1em;
+            width: 120px;
+            margin-bottom: 15px;
+        }
+
+        .skeleton-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .skeleton-metric {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .skeleton-metric-label {
+            height: 0.85em;
+            width: 60px;
+            margin-bottom: 5px;
+            background: linear-gradient(90deg, #e0e0e0 25%, #c0c0c0 50%, #e0e0e0 75%);
+            background-size: 200% 100%;
+            border-radius: 4px;
+            animation: shimmer 1.5s infinite;
+        }
+
+        .skeleton-metric-value {
+            height: 1.3em;
+            width: 80px;
+            margin-top: 5px;
+            background: linear-gradient(90deg, #d0d0d0 25%, #b0b0b0 50%, #d0d0d0 75%);
+            background-size: 200% 100%;
+            border-radius: 4px;
+            animation: shimmer 1.5s infinite;
+        }
+
+        .skeleton-threshold {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .skeleton-threshold-line {
+            height: 0.9em;
+            width: 70%;
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, #f0e0a0 25%, #e0d090 50%, #f0e0a0 75%);
+            background-size: 200% 100%;
+            border-radius: 4px;
+            animation: shimmer 1.5s infinite;
+        }
+
+        .skeleton-bottom {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .skeleton-bottom-line {
+            height: 0.9em;
+            width: 50%;
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, #e0e0e0 25%, #c0c0c0 50%, #e0e0e0 75%);
+            background-size: 200% 100%;
+            border-radius: 4px;
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Tooltip styles */
+        .info-tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            color: #3b82f6;
+            font-size: 0.85em;
+            margin-left: 5px;
+        }
+
+        .info-tooltip .tooltip-text {
+            visibility: hidden;
+            opacity: 0;
+            background-color: #1f2937;
+            color: #fff;
+            text-align: left;
+            border-radius: 8px;
+            padding: 12px 16px;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            font-size: 0.9em;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: opacity 0.3s, visibility 0.3s;
+            pointer-events: none;
+            max-width: 400px;
+            min-width: 300px;
+            white-space: normal;
+            line-height: 1.5;
+        }
+
+        .info-tooltip .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #1f2937 transparent transparent transparent;
+        }
+
+        .info-tooltip:hover .tooltip-text,
+        .info-tooltip.active .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .info-tooltip .tooltip-text {
+                left: 0;
+                transform: translateX(0);
+                max-width: 320px;
+                min-width: 280px;
+            }
+
+            .info-tooltip .tooltip-text::after {
+                left: 20px;
+            }
+        }
+
+        .refresh-btn {
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            background: #34495e;
+        }
+
+        .refresh-btn:active {
+            transform: scale(0.98);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        /* Ensure skeleton loader is always visible when it has display:grid */
+        #skeleton-loader {
+            min-height: 400px;
+        }
+        
+        /* Make skeleton cards fully visible */
+        #skeleton-loader .skeleton-card {
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎰 Lottery Assistant Dashboard</h1>
+            <div class="timestamp" id="timestamp">Loading...</div>
+            <button class="refresh-btn" onclick="loadData(true)">🔄 Refresh (Fetch Latest)</button>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">
+        </div>
+
+        <div id="skeleton-loader" class="skeleton-loader" style="display: grid; visibility: visible; opacity: 1;">
+            <div class="skeleton-card">
+                <div class="skeleton-header">
+                    <div class="skeleton-line game-name"></div>
+                    <div class="skeleton-line ev-badge"></div>
+                </div>
+                <div class="skeleton-line jackpot"></div>
+                <div class="skeleton-line change"></div>
+                <div class="skeleton-metrics">
+                    <div class="skeleton-metric">
+                        <div class="skeleton-metric-label"></div>
+                        <div class="skeleton-metric-value"></div>
+                    </div>
+                    <div class="skeleton-metric">
+                        <div class="skeleton-metric-label"></div>
+                        <div class="skeleton-metric-value"></div>
+                    </div>
+                    <div class="skeleton-metric">
+                        <div class="skeleton-metric-label"></div>
+                        <div class="skeleton-metric-value"></div>
+                    </div>
+                    <div class="skeleton-metric">
+                        <div class="skeleton-metric-label"></div>
+                        <div class="skeleton-metric-value"></div>
+                    </div>
+                </div>
+                <div class="skeleton-threshold">
+                    <div class="skeleton-threshold-line"></div>
+                    <div class="skeleton-threshold-line"></div>
+                    <div class="skeleton-threshold-line"></div>
+                </div>
+                <div class="skeleton-bottom">
+                    <div class="skeleton-bottom-line"></div>
+                    <div class="skeleton-bottom-line"></div>
+                </div>
+            </div>
+            <div class="skeleton-card">
+                <div class="skeleton-header">
+                    <div class="skeleton-line game-name"></div>
+                    <div class="skeleton-line ev-badge"></div>
+                </div>
+                <div class="skeleton-line jackpot"></div>
+                <div class="skeleton-line change"></div>
+                <div class="skeleton-metrics">
+                    <div class="skeleton-metric">
+                        <div class="skeleton-metric-label"></div>
+                        <div class="skeleton-metric-value"></div>
+                    </div>
+                    <div class="skeleton-metric">
+                        <div class="skeleton-metric-label"></div>
+                        <div class="skeleton-metric-value"></div>
+                    </div>
+                    <div class="skeleton-metric">
+                        <div class="skeleton-metric-label"></div>
+                        <div class="skeleton-metric-value"></div>
+                    </div>
+                    <div class="skeleton-metric">
+                        <div class="skeleton-metric-label"></div>
+                        <div class="skeleton-metric-value"></div>
+                    </div>
+                </div>
+                <div class="skeleton-threshold">
+                    <div class="skeleton-threshold-line"></div>
+                    <div class="skeleton-threshold-line"></div>
+                    <div class="skeleton-threshold-line"></div>
+                </div>
+                <div class="skeleton-bottom">
+                    <div class="skeleton-bottom-line"></div>
+                    <div class="skeleton-bottom-line"></div>
+                </div>
+            </div>
+            <div class="skeleton-card">
+                <div class="skeleton-header">
+                    <div class="skeleton-line game-name"></div>
+                    <div class="skeleton-line ev-badge"></div>
+                </div>
+                <div class="skeleton-line jackpot"></div>
+                <div class="skeleton-line change"></div>
+                <div class="skeleton-metrics">
+                    <div class="skeleton-metric">
+                        <div class="skeleton-metric-label"></div>
+                        <div class="skeleton-metric-value"></div>
+                    </div>
+                    <div class="skeleton-metric">
+                        <div class="skeleton-metric-label"></div>
+                        <div class="skeleton-metric-value"></div>
+                    </div>
+                    <div class="skeleton-metric">
+                        <div class="skeleton-metric-label"></div>
+                        <div class="skeleton-metric-value"></div>
+                    </div>
+                    <div class="skeleton-metric">
+                        <div class="skeleton-metric-label"></div>
+                        <div class="skeleton-metric-value"></div>
+                    </div>
+                </div>
+                <div class="skeleton-threshold">
+                    <div class="skeleton-threshold-line"></div>
+                    <div class="skeleton-threshold-line"></div>
+                    <div class="skeleton-threshold-line"></div>
+                </div>
+                <div class="skeleton-bottom">
+                    <div class="skeleton-bottom-line"></div>
+                    <div class="skeleton-bottom-line"></div>
+                </div>
+            </div>
+            <div class="skeleton-card">
+                <div class="skeleton-header">
+                    <div class="skeleton-line game-name"></div>
+                    <div class="skeleton-line ev-badge"></div>
+                </div>
+                <div class="skeleton-line jackpot"></div>
+                <div class="skeleton-line change"></div>
+                <div class="skeleton-metrics">
+                    <div class="skeleton-metric">
+                        <div class="skeleton-metric-label"></div>
+                        <div class="skeleton-metric-value"></div>
+                    </div>
+                    <div class="skeleton-metric">
+                        <div class="skeleton-metric-label"></div>
+                        <div class="skeleton-metric-value"></div>
+                    </div>
+                    <div class="skeleton-metric">
+                        <div class="skeleton-metric-label"></div>
+                        <div class="skeleton-metric-value"></div>
+                    </div>
+                    <div class="skeleton-metric">
+                        <div class="skeleton-metric-label"></div>
+                        <div class="skeleton-metric-value"></div>
+                    </div>
+                </div>
+                <div class="skeleton-threshold">
+                    <div class="skeleton-threshold-line"></div>
+                    <div class="skeleton-threshold-line"></div>
+                    <div class="skeleton-threshold-line"></div>
+                </div>
+                <div class="skeleton-bottom">
+                    <div class="skeleton-bottom-line"></div>
+                    <div class="skeleton-bottom-line"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="games-container" class="games-grid" style="display: none;"></div>
+
+        <div id="history-container" class="history-section" style="display: none; margin-top: 30px;">
+            <h2>📊 Recent Threshold Alerts</h2>
+            <div id="history-list"></div>
+        </div>
+    </div>
+
+    <script>
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+
+        function formatNumber(num) {
+            return new Intl.NumberFormat('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(num);
+        }
+
+        function formatDate(isoString) {
+            if (!isoString) return 'Never';
+            const date = new Date(isoString);
+            return date.toLocaleString();
+        }
+
+        function getEVBadgeClass(evResult) {
+            // Use EV tier class if available, otherwise fall back to old system
+            if (evResult.ev_tier_class) return evResult.ev_tier_class;
+            if (evResult.is_positive_ev) return 'ev-positive';
+            if (evResult.is_recommended) return 'ev-warning';
+            return 'ev-negative';
+        }
+
+        function getEVBadgeText(evResult) {
+            // Use EV tier label if available, otherwise fall back to old system
+            if (evResult.ev_tier) return evResult.ev_tier;
+            if (evResult.is_positive_ev) return '✅ Positive EV';
+            if (evResult.is_recommended) return '⚠️ Near Break-Even';
+            return '❌ Negative EV';
+        }
+
+        function renderGameCard(gameId, gameData) {
+            const changeClass = gameData.change > 0 ? 'positive' : gameData.change < 0 ? 'negative' : 'neutral';
+            const changeSymbol = gameData.change > 0 ? '↑' : gameData.change < 0 ? '↓' : '➡️';
+            
+            return `
+                <div class="game-card">
+                    <div class="game-header">
+                        <div class="game-name">${gameData.name}</div>
+                        <div class="ev-badge ${getEVBadgeClass(gameData)}">${getEVBadgeText(gameData)}</div>
+                    </div>
+                    
+                    <div class="jackpot">${formatCurrency(gameData.current_jackpot)}</div>
+                    
+                    ${gameData.change !== 0 ? `
+                    <div class="change ${changeClass}">
+                        ${changeSymbol} ${formatCurrency(Math.abs(gameData.change))} 
+                        ${gameData.change_percent !== 0 ? `(${gameData.change_percent > 0 ? '+' : ''}${formatNumber(gameData.change_percent)}%)` : ''}
+                    </div>
+                    ` : ''}
+                    
+                    <div class="metrics">
+                        <div class="metric">
+                            <div class="metric-label">Net EV</div>
+                            <div class="metric-value">${formatCurrency(gameData.net_ev)}</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">EV %</div>
+                            <div class="metric-value">${formatNumber(gameData.ev_percentage)}%</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Ticket Cost</div>
+                            <div class="metric-value">${formatCurrency(gameData.ticket_cost)}</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Odds</div>
+                            <div class="metric-value">1 in ${gameData.odds.toLocaleString()}</div>
+                        </div>
+                    </div>
+                    
+                    ${gameData.buy_signal ? `
+                        <div style="margin-top: 15px; padding: 12px; background: ${gameData.buy_signal_confidence === 'high' ? '#dcfce7' : gameData.buy_signal_confidence === 'medium' ? '#fef3c7' : '#fee2e2'}; border-radius: 8px; border-left: 4px solid ${gameData.buy_signal_confidence === 'high' ? '#10b981' : gameData.buy_signal_confidence === 'medium' ? '#f59e0b' : '#ef4444'};">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
+                                <strong style="color: ${gameData.buy_signal_confidence === 'high' ? '#065f46' : gameData.buy_signal_confidence === 'medium' ? '#92400e' : '#991b1b'}; font-size: 1em;">
+                                    ${gameData.buy_signal_message || '🟡 Consider Buying'}
+                                </strong>
+                                <span class="info-tooltip" onclick="event.stopPropagation(); this.classList.toggle('active');">
+                                    ℹ️
+                                    <span class="tooltip-text">
+                                        ${gameData.buy_signal_confidence === 'high' ? 'Strong Buy = Positive expected value (actually profitable). High confidence this is worth buying.' : 
+                                          gameData.buy_signal_confidence === 'medium' ? 'Consider Buying = Acceptable expected value or multiple criteria met. Medium confidence - worth considering.' : 
+                                          'Not Recommended = Criteria met (large jackpot/rollovers) but expected value is terrible. Low confidence - not a good bet mathematically.'}
+                                        <br><br>Generated by analytics model, not official lottery messaging.
+                                    </span>
+                                </span>
+                            </div>
+                            ${gameData.buy_signal_reasons && gameData.buy_signal_reasons.length > 0 ? `
+                                <div style="font-size: 0.85em; color: #666; line-height: 1.6; margin-top: 8px;">
+                                    <div style="font-weight: 600; margin-bottom: 4px; color: #555;">Reasons:</div>
+                                    <ul style="margin: 0; padding-left: 20px;">
+                                        ${gameData.buy_signal_reasons.map(reason => `<li style="margin-bottom: 4px;">${reason}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                        </div>
+                    ` : ''}
+                    
+                    ${gameData.min_threshold ? `
+                        <div class="threshold-info">
+                            <h4>🎯 Threshold Status</h4>
+                            <p>Minimum: ${formatCurrency(gameData.min_threshold)}</p>
+                            <p>Last Hit: ${gameData.last_threshold > 0 ? formatCurrency(gameData.last_threshold) : 'Never'}</p>
+                            <p>Total Alerts: ${gameData.thresholds_hit_count}</p>
+                            ${gameData.last_alert_time ? `<p>Last Alert: ${formatDate(gameData.last_alert_time)}</p>` : ''}
+                        </div>
+                    ` : ''}
+                    
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #f0f0f0; color: #666; font-size: 0.9em;">
+                        <div style="margin-bottom: 8px;">
+                            <strong>Next draw in:</strong> ${gameData.time_to_draw || 'Unknown'}
+                            ${(gameData.rollover_count !== undefined && gameData.rollover_count !== null) ? `<span style="color: #999; margin-left: 12px;">Rollovers: ${gameData.rollover_count}</span>` : ''}
+                        </div>
+                        <div style="margin-bottom: 8px;">Draw Time: ${gameData.draw_time || 'N/A'}</div>
+                        <div style="position: relative; display: inline-block;">
+                            Break-Even: ${formatCurrency(gameData.break_even_jackpot)}
+                            <span class="info-tooltip" onclick="event.stopPropagation(); this.classList.toggle('active');">
+                                ℹ️
+                                <span class="tooltip-text">Break-even = jackpot size where expected value of a single ticket becomes non-negative, assuming cash value and no taxes.</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderHistory(history) {
+            if (history.length === 0) {
+                return '<p style="color: #666; text-align: center; padding: 20px;">No threshold alerts yet.</p>';
+            }
+
+            return history.map(item => `
+                <div class="history-item">
+                    <div>
+                        <div class="history-game">${item.game_name}</div>
+                        <div class="history-time">${formatDate(item.timestamp)}</div>
+                    </div>
+                    <div>
+                        <div class="history-threshold">${formatCurrency(item.threshold)}</div>
+                        <div style="color: #666; font-size: 0.9em;">Jackpot: ${formatCurrency(item.jackpot)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showSkeletonLoader() {
+            const skeletonContainer = document.getElementById('skeleton-loader');
+            // Show 3 skeleton cards: 1 for LDL (next draw), 1 for Powerball, 1 for Mega Millions
+            const skeletonCount = 3;
+            
+            // Generate skeleton cards matching game card structure
+            skeletonContainer.innerHTML = Array(skeletonCount).fill(0).map(() => `
+                <div class="skeleton-card">
+                    <div class="skeleton-header">
+                        <div class="skeleton-line game-name"></div>
+                        <div class="skeleton-line ev-badge"></div>
+                    </div>
+                    
+                    <div class="skeleton-line jackpot"></div>
+                    
+                    <div class="skeleton-line change"></div>
+                    
+                    <div class="skeleton-metrics">
+                        <div class="skeleton-metric">
+                            <div class="skeleton-metric-label"></div>
+                            <div class="skeleton-metric-value"></div>
+                        </div>
+                        <div class="skeleton-metric">
+                            <div class="skeleton-metric-label"></div>
+                            <div class="skeleton-metric-value"></div>
+                        </div>
+                        <div class="skeleton-metric">
+                            <div class="skeleton-metric-label"></div>
+                            <div class="skeleton-metric-value"></div>
+                        </div>
+                        <div class="skeleton-metric">
+                            <div class="skeleton-metric-label"></div>
+                            <div class="skeleton-metric-value"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="skeleton-threshold">
+                        <div class="skeleton-threshold-line"></div>
+                        <div class="skeleton-threshold-line"></div>
+                        <div class="skeleton-threshold-line"></div>
+                    </div>
+                    
+                    <div class="skeleton-bottom">
+                        <div class="skeleton-bottom-line"></div>
+                        <div class="skeleton-bottom-line"></div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Force show skeleton with proper visibility, hide everything else
+            skeletonContainer.style.cssText = 'display: grid !important; visibility: visible !important; opacity: 1 !important;';
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('games-container').style.display = 'none';
+            document.getElementById('history-container').style.display = 'none';
+        }
+        
+
+        async function loadData(forceRefresh = false) {
+            // Show skeleton loader immediately with spinner
+            const skeletonLoader = document.getElementById('skeleton-loader');
+            // Always ensure skeleton cards are populated and visible
+            showSkeletonLoader();
+            
+            // Record start time to ensure minimum display time
+            const loadStartTime = Date.now();
+            const minDisplayTime = 500; // Show skeleton for at least 500ms
+
+            try {
+                // Load status (use /api/refresh if forceRefresh, otherwise /api/status)
+                // Add cache-busting timestamp to ensure fresh data
+                const timestamp = new Date().getTime();
+                const endpoint = forceRefresh ? '/api/refresh' : '/api/status';
+                const statusResponse = await fetch(`${endpoint}?_=${timestamp}`, {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache'
+                    }
+                });
+                
+                if (!statusResponse.ok) {
+                    throw new Error(`HTTP ${statusResponse.status}: ${statusResponse.statusText}`);
+                }
+                
+                const statusData = await statusResponse.json();
+
+                if (statusData.error) {
+                    throw new Error(statusData.error);
+                }
+                
+                // Check if we have any games
+                if (!statusData.games || Object.keys(statusData.games).length === 0) {
+                    // Hide skeleton loader
+                    const skeletonLoader = document.getElementById('skeleton-loader');
+                    skeletonLoader.style.display = 'none';
+                    skeletonLoader.style.visibility = 'hidden';
+                    skeletonLoader.style.opacity = '0';
+                    
+                    let message = '⚠️ No game data available yet.<br><br>';
+                    if (statusData.message) {
+                        message += statusData.message + '<br><br>';
+                    } else {
+                        message += 'Run <code>python main.py check</code> first to populate data,<br>' +
+                                  'or click "Refresh (Fetch Latest)" to fetch current jackpots now.<br><br>' +
+                                  '<small style="color: #666;">This may take 10-20 seconds...</small>';
+                    }
+                    document.getElementById('loading').innerHTML = 
+                        '<div style="color: #f59e0b; text-align: center; padding: 50px;">' + message + '</div>';
+                    document.getElementById('loading').style.display = 'block';
+                    return;
+                }
+
+                // Update timestamp
+                document.getElementById('timestamp').textContent = 
+                    `Last Updated: ${formatDate(statusData.timestamp)}`;
+
+                // Render games
+                const gamesContainer = document.getElementById('games-container');
+                
+                // Determine which LDL draw is next (midday or evening)
+                let nextLDLGame = null;
+                const middayGame = statusData.games['lucky_day_lotto_midday'];
+                const eveningGame = statusData.games['lucky_day_lotto_evening'];
+                
+                if (middayGame && eveningGame) {
+                    // Compare next draw times to determine which is next
+                    const middayDrawTime = middayGame.next_draw_time ? new Date(middayGame.next_draw_time) : null;
+                    const eveningDrawTime = eveningGame.next_draw_time ? new Date(eveningGame.next_draw_time) : null;
+                    
+                    if (middayDrawTime && eveningDrawTime) {
+                        // Show whichever draw is coming up next
+                        nextLDLGame = middayDrawTime < eveningDrawTime ? 'lucky_day_lotto_midday' : 'lucky_day_lotto_evening';
+                    } else if (middayDrawTime) {
+                        nextLDLGame = 'lucky_day_lotto_midday';
+                    } else if (eveningDrawTime) {
+                        nextLDLGame = 'lucky_day_lotto_evening';
+                    } else {
+                        // Fallback: use midday if both exist but no draw times
+                        nextLDLGame = 'lucky_day_lotto_midday';
+                    }
+                } else if (middayGame) {
+                    nextLDLGame = 'lucky_day_lotto_midday';
+                } else if (eveningGame) {
+                    nextLDLGame = 'lucky_day_lotto_evening';
+                }
+                
+                // Build game order with only the next LDL draw
+                const gameOrder = [];
+                if (nextLDLGame) {
+                    gameOrder.push(nextLDLGame);
+                }
+                gameOrder.push('powerball', 'mega_millions');
+
+                // Ensure minimum display time for skeleton loader before showing data
+                const elapsed = Date.now() - loadStartTime;
+                const remainingTime = Math.max(0, minDisplayTime - elapsed);
+                
+                setTimeout(() => {
+                    // Render games after minimum display time
+                    gamesContainer.innerHTML = gameOrder
+                        .filter(id => statusData.games[id])
+                        .map(id => renderGameCard(id, statusData.games[id]))
+                        .join('');
+
+                    gamesContainer.style.display = 'grid';
+                    
+                    // Hide skeleton loader and loading text now that we have data
+                    const skeletonLoader = document.getElementById('skeleton-loader');
+                    skeletonLoader.style.display = 'none';
+                    skeletonLoader.style.visibility = 'hidden';
+                    skeletonLoader.style.opacity = '0';
+                    document.getElementById('loading').style.display = 'none';
+                }, remainingTime);
+
+                // Load history with cache-busting
+                const historyResponse = await fetch(`/api/history?_=${timestamp}`, {
+                    cache: 'no-store'
+                });
+                const historyData = await historyResponse.json();
+
+                if (!historyData.error) {
+                    const historyContainer = document.getElementById('history-container');
+                    const historyList = document.getElementById('history-list');
+                    historyList.innerHTML = renderHistory(historyData.history || []);
+                    historyContainer.style.display = 'block';
+                }
+
+            } catch (error) {
+                console.error('Error loading data:', error);
+                
+                // Hide skeleton loader
+                const skeletonLoader = document.getElementById('skeleton-loader');
+                skeletonLoader.style.display = 'none';
+                skeletonLoader.style.visibility = 'hidden';
+                skeletonLoader.style.opacity = '0';
+                
+                let errorMessage = `❌ Error loading data: ${error.message}<br><br>`;
+                
+                // Check if it's a 404 (server not running)
+                if (error.message.includes('404') || error.message.includes('Not Found')) {
+                    errorMessage += 
+                        '<strong style="color: #2c3e50;">Flask server is not running!</strong><br><br>' +
+                        'To fix this:<br>' +
+                        '1. Open a terminal in the project directory<br>' +
+                        '2. Run: <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">python dashboard.py</code><br>' +
+                        '3. Then open: <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">http://localhost:5000</code><br><br>' +
+                        '<small style="color: #666;">Do NOT open the HTML file directly. It must be served by Flask.</small>';
+                } else {
+                    errorMessage += '<small style="color: #666;">Check console for details. Make sure the backend is running.</small>';
+                }
+                
+                document.getElementById('loading').innerHTML = 
+                    '<div style="color: #ef4444; text-align: center; padding: 50px; line-height: 1.8;">' +
+                    errorMessage +
+                    '</div>';
+                document.getElementById('loading').style.display = 'block';
+            }
+        }
+
+        // Show skeleton loader immediately on page load
+        // Make sure it's visible before any async operations
+        window.addEventListener('DOMContentLoaded', function() {
+            showSkeletonLoader();
+        });
+        
+        // Also show it immediately (in case DOMContentLoaded already fired)
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', showSkeletonLoader);
+        } else {
+            showSkeletonLoader();
+        }
+        
+        // Load data on page load (fast, from state)
+        // Use a small delay to ensure skeleton is visible first
+        setTimeout(() => {
+            loadData(false);
+        }, 100);
+
+        // Auto-refresh every 60 seconds (fast, from state)
+        setInterval(() => loadData(false), 60000);
+
+        // Close tooltips when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.info-tooltip')) {
+                document.querySelectorAll('.info-tooltip').forEach(tooltip => {
+                    tooltip.classList.remove('active');
+                });
+            }
+        });
+
+        // Live reload for development - only checks when page is visible
+        // Only active when Flask is in debug mode (check for debug indicator)
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            let lastModified = document.lastModified;
+            let checkInterval = null;
+            
+            function startLiveReload() {
+                if (checkInterval) return; // Already running
+                
+                checkInterval = setInterval(() => {
+                    // Only check if page is visible
+                    if (document.hidden) return;
+                    
+                    fetch(window.location.href, { method: 'HEAD', cache: 'no-cache' })
+                        .then(response => {
+                            const newModified = response.headers.get('last-modified');
+                            if (newModified && newModified !== lastModified) {
+                                console.log('Template updated, reloading...');
+                                clearInterval(checkInterval);
+                                window.location.reload();
+                            }
+                        })
+                        .catch(() => {
+                            // Silently fail if check doesn't work
+                        });
+                }, 10000); // Check every 5 seconds, but only when page is visible
+            }
+            
+            function stopLiveReload() {
+                if (checkInterval) {
+                    clearInterval(checkInterval);
+                    checkInterval = null;
+                }
+            }
+            
+            // Start when page becomes visible, stop when hidden
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    stopLiveReload();
+                } else {
+                    startLiveReload();
+                }
+            });
+            
+            // Start initially if page is visible
+            if (!document.hidden) {
+                startLiveReload();
+            }
+        }
+    </script>
+</body>
+</html>

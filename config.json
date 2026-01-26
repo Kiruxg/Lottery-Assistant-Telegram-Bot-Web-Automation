@@ -1,0 +1,91 @@
+{
+  "lottery_games": {
+    "lucky_day_lotto_midday": {
+      "enabled": true,
+      "name": "Lucky Day Lotto Midday",
+      "draw_time": "12:40",
+      "ticket_cost": 1.0,
+      "odds": 575757,
+      "secondary_prize_ev": 0.10,
+      "min_threshold": 500000,
+      "step_increment": 50000,
+      "threshold_operator": ">=",
+      "starting_jackpot": 50000,
+      "rollover_increment": 50000
+    },
+    "lucky_day_lotto_evening": {
+      "enabled": true,
+      "name": "Lucky Day Lotto Evening",
+      "draw_time": "21:22",
+      "ticket_cost": 1.0,
+      "odds": 575757,
+      "secondary_prize_ev": 0.10,
+      "min_threshold": 500000,
+      "step_increment": 50000,
+      "threshold_operator": ">=",
+      "starting_jackpot": 50000,
+      "rollover_increment": 50000
+    },
+    "powerball": {
+      "enabled": true,
+      "name": "Powerball",
+      "draw_time": "21:59",
+      "ticket_cost": 2.0,
+      "odds": 292201338,
+      "secondary_prize_ev": 0.15,
+      "min_threshold": 100000000,
+      "step_increment": 10000000,
+      "threshold_operator": ">",
+      "starting_jackpot": 20000000,
+      "rollover_increment": 2000000
+    },
+    "mega_millions": {
+      "enabled": true,
+      "name": "Mega Millions",
+      "draw_time": "22:00",
+      "ticket_cost": 5.0,
+      "odds": 302575350,
+      "secondary_prize_ev": 0.15,
+      "min_threshold": 100000000,
+      "step_increment": 10000000,
+      "threshold_operator": ">",
+      "starting_jackpot": 20000000,
+      "rollover_increment": 2000000
+    }
+  },
+  "alert_settings": {
+    "check_interval_minutes": 60,
+    "alert_on_first_threshold": true,
+    "cooldown_minutes": 30
+  },
+  "ev_settings": {
+    "include_secondary_prizes": true,
+    "tax_rate": 0.37,
+    "lump_sum_factor": 0.61
+  },
+  "automation_settings": {
+    "headless": false,
+    "timeout_seconds": 30,
+    "wait_for_user_confirmation": true,
+    "stop_at_checkout": true
+  },
+  "persistence": {
+    "storage_type": "file",
+    "data_file": "lottery_state.json",
+    "log_file": "lottery_assistant.log"
+  },
+  "buy_signal_settings": {
+    "jackpot_threshold": {
+      "lucky_day_lotto_midday": 500000,
+      "lucky_day_lotto_evening": 500000,
+      "powerball": 100000000,
+      "mega_millions": 100000000
+    },
+    "rollover_threshold": {
+      "powerball": 10,
+      "mega_millions": 10
+    },
+    "ev_threshold": -0.20,
+    "draw_window_hours": 24
+  }
+}
