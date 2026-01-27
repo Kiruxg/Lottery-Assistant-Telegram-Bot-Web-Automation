@@ -1,7 +1,8 @@
 # Get Telegram Chat ID Script
 # Run this AFTER sending a message to your bot
+# Replace YOUR_BOT_TOKEN_HERE with your actual bot token from BotFather
 
-$token = "8428672627:AAEzH0ejuM4J5-l35N6WQLaNI7G6vXaW3fE"
+$token = "YOUR_BOT_TOKEN_HERE"
 
 Write-Host "`nFetching updates from Telegram..." -ForegroundColor Cyan
 
