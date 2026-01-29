@@ -6,44 +6,338 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Lottery Assistant Dashboard</title>
+    <title>LottoEdge Dashboard</title>
     <style>
+        :root {
+            /* Primary Colors */
+            --color-primary: #3b82f6;
+            --color-primary-dark: #2563eb;
+            --color-primary-light: #60a5fa;
+            
+            /* Neutral Colors */
+            --color-text-primary: #1f2937;
+            --color-text-secondary: #4b5563;
+            --color-text-tertiary: #6b7280;
+            --color-bg-primary: #ffffff;
+            --color-bg-secondary: #f9fafb;
+            --color-bg-tertiary: #f3f4f6;
+            --color-border: #e5e7eb;
+            --color-border-light: #f3f4f6;
+            
+            /* Status Colors */
+            --color-success: #10b981;
+            --color-success-dark: #059669;
+            --color-success-light: #34d399;
+            --color-warning: #f59e0b;
+            --color-warning-dark: #d97706;
+            --color-warning-light: #fbbf24;
+            --color-danger: #ef4444;
+            --color-danger-dark: #dc2626;
+            --color-danger-light: #f87171;
+            
+            /* Special Colors */
+            --color-gold: #ffd700;
+            --color-gold-dark: #fbbf24;
+            --color-nav-bg: #f9fafb;
+            --color-comparison-bg: #ffffff;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        html {
+            overflow-x: hidden;
+            width: 100%;
+            position: relative;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: #f5f5f5;
+            background: var(--color-bg-tertiary);
             min-height: 100vh;
-            padding: 20px;
-            color: #333;
+            padding: 0;
+            margin: 0;
+            color: var(--color-text-primary);
+            overflow-x: hidden;
+            width: 100%;
+            position: relative;
         }
 
         .container {
             max-width: 1400px;
             margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+
+        nav {
+            background: var(--color-nav-bg);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 0;
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            line-height: 1;
+            width: 100%;
+            box-sizing: border-box;
+            margin: 0;
+            /* Ensure nav doesn't shift with scrollbar */
+            transform: translateZ(0);
+            will-change: transform;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+            box-sizing: border-box;
+        }
+
+        .logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--color-primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            margin: 0;
+        }
+
+        .nav-links a {
+            color: var(--color-text-primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--color-primary);
+        }
+
+        .nav-btn {
+            background: var(--color-primary);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s ease;
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-btn:hover {
+            background: var(--color-primary-dark);
         }
 
         .header {
-            background: white;
+            background: var(--color-bg-primary);
             border-radius: 15px;
             padding: 30px;
             margin-bottom: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background: var(--color-bg-secondary);
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .view-toggle button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            background: var(--color-bg-primary);
+            color: var(--color-primary);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .view-toggle button.active {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .view-toggle button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        }
+
+
+        .games-grid.vertical {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 25px;
+        }
+        
+        .games-grid.vertical > .game-card {
+            width: 100%;
+        }
+
+        .trend-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-left: 12px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .trend-indicator:hover {
+            background: rgba(0, 0, 0, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .trend-up {
+            color: var(--color-success);
+        }
+
+        .trend-down {
+            color: var(--color-danger);
+        }
+
+        .trend-neutral {
+            color: var(--color-text-tertiary);
+        }
+
+        .rollover-tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+
+        .rollover-tooltip .tooltip-content {
+            visibility: hidden;
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--color-text-primary);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            width: 280px;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .rollover-tooltip:hover .tooltip-content {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .rollover-tooltip .tooltip-content::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: var(--color-text-primary);
+        }
+
+        .ev-progress-container {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .ev-progress-label {
+            font-size: 0.75em;
+            color: var(--color-text-tertiary);
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ev-progress-bar {
+            background: var(--color-border-light);
+            border-radius: 6px;
+            height: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .ev-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-danger) 0%, var(--color-warning) 50%, var(--color-warning-light) 75%, var(--color-success) 100%);
+            transition: width 0.5s ease;
+            border-radius: 6px;
+        }
+
+        .ev-progress-text {
             text-align: center;
+            margin-top: 6px;
+            font-size: 0.8em;
+            color: var(--color-text-tertiary);
+            font-weight: 600;
+        }
+
+        .header-content {
+            flex: 1;
+            text-align: center;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
         }
 
         .header h1 {
             font-size: 2.5em;
-            color: #2c3e50;
+            color: var(--color-text-primary);
             margin-bottom: 10px;
         }
 
         .header .timestamp {
-            color: #666;
+            color: var(--color-text-tertiary);
             font-size: 0.9em;
         }
 
@@ -51,11 +345,71 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 25px;
-            margin-bottom: 30px;
+            margin: 0 0 30px 0;
+            width: 100%;
+            max-width: 100%;
+            align-items: start;
+            box-sizing: border-box;
         }
+        
+        .games-grid > .game-card {
+            display: flex;
+            flex-direction: column;
+            height: auto;
+            min-height: fit-content;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        
+        /* Any direct children that aren't game-card should be hidden */
+        .games-grid > *:not(.game-card) {
+            display: none !important;
+        }
+        
+        /* Responsive grid adjustments */
+        @media (min-width: 1600px) {
+            .games-grid {
+                grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            }
+        }
+        
+        @media (max-width: 1200px) {
+            .games-grid {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
 
         /* Mobile responsiveness */
         @media (max-width: 768px) {
+            nav {
+                padding: 0.75rem 1rem;
+            }
+
+            .logo {
+                font-size: 1.2em;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .nav-links a {
+                font-size: 0.9em;
+            }
+
+            .nav-btn {
+                padding: 0.4rem 1rem;
+                font-size: 0.85em;
+            }
+
             .games-grid {
                 grid-template-columns: 1fr;
                 gap: 20px;
@@ -97,6 +451,27 @@
         }
 
         @media (max-width: 480px) {
+            nav {
+                padding: 0.5rem 0.75rem;
+            }
+
+            .logo {
+                font-size: 1em;
+            }
+
+            .nav-links {
+                gap: 0.75rem;
+            }
+
+            .nav-links a {
+                font-size: 0.8em;
+            }
+
+            .nav-btn {
+                padding: 0.35rem 0.75rem;
+                font-size: 0.75em;
+            }
+
             body {
                 padding: 10px;
             }
@@ -124,11 +499,61 @@
         }
 
         .game-card {
-            background: white;
+            background: var(--color-bg-primary);
             border-radius: 15px;
-            padding: 25px;
+            padding: 18px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: visible;
+        }
+        
+        .game-card > * {
+            min-width: 0;
+            max-width: 100%;
+        }
+        
+        /* Collapsible Sections */
+        .collapsible-section {
+            transition: all 0.2s ease;
+            display: block !important;
+            visibility: visible !important;
+        }
+        
+        .collapsible-header {
+            transition: background 0.2s ease;
+            display: flex !important;
+            visibility: visible !important;
+        }
+        
+        .collapsible-header:hover {
+            background: #f0f0f0 !important;
+        }
+        
+        .collapsible-content {
+            transition: max-height 0.3s ease, opacity 0.2s ease;
+        }
+        
+        .collapsible-icon {
+            font-size: 0.8em;
+            color: #666;
+        }
+        
+        .collapsible-section.collapsed .collapsible-icon {
+            transform: rotate(-90deg);
+        }
+        
+        /* Ensure Actions section is always visible */
+        .game-card .collapsible-section {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
 
         .game-card:hover {
@@ -142,14 +567,14 @@
             align-items: center;
             margin-bottom: 20px;
             padding-bottom: 15px;
-            border-bottom: 2px solid #f0f0f0;
+            border-bottom: 2px solid var(--color-border-light);
             gap: 10px;
         }
 
         .game-name {
-            font-size: 1.5em;
+            font-size: 1.25em;
             font-weight: bold;
-            color: #333;
+            color: var(--color-text-primary);
             flex: 1;
         }
 
@@ -163,49 +588,49 @@
         }
 
         .ev-positive {
-            background: #10b981;
+            background: var(--color-success);
             color: white;
         }
 
         .ev-warning {
-            background: #f59e0b;
+            background: var(--color-warning);
             color: white;
         }
 
         .ev-negative {
-            background: #ef4444;
+            background: var(--color-danger);
             color: white;
         }
 
         /* New EV Tier System */
         /* EV Tier System - Gradient colors for better visual distinction */
         .ev-anomaly {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-dark) 100%);
             color: white;
             font-weight: bold;
             box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
         }
 
         .ev-positive-small {
-            background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+            background: linear-gradient(135deg, var(--color-success-light) 0%, var(--color-success) 100%);
             color: white;
             box-shadow: 0 2px 6px rgba(52, 211, 153, 0.2);
         }
 
         .ev-neutral {
-            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            background: linear-gradient(135deg, var(--color-warning-light) 0%, var(--color-warning) 100%);
             color: white;
             box-shadow: 0 2px 6px rgba(251, 191, 36, 0.2);
         }
 
         .ev-bad {
-            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+            background: linear-gradient(135deg, var(--color-warning) 0%, var(--color-danger) 100%);
             color: white;
             box-shadow: 0 2px 6px rgba(245, 158, 11, 0.2);
         }
 
         .ev-terrible {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            background: linear-gradient(135deg, var(--color-danger) 0%, var(--color-danger-dark) 100%);
             color: white;
             box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
         }
@@ -213,8 +638,12 @@
         .jackpot {
             font-size: 2.5em;
             font-weight: bold;
-            color: #2c3e50;
+            color: var(--color-text-primary);
             margin: 15px 0;
+            display: flex;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .change {
@@ -223,15 +652,15 @@
         }
 
         .change.positive {
-            color: #10b981;
+            color: var(--color-success);
         }
 
         .change.negative {
-            color: #ef4444;
+            color: var(--color-danger);
         }
 
         .change.neutral {
-            color: #666;
+            color: var(--color-text-tertiary);
         }
 
         .metrics {
@@ -242,21 +671,21 @@
         }
 
         .metric {
-            background: #f8f9fa;
+            background: var(--color-bg-secondary);
             padding: 15px;
             border-radius: 10px;
         }
 
         .metric-label {
             font-size: 0.85em;
-            color: #666;
+            color: var(--color-text-tertiary);
             margin-bottom: 5px;
         }
 
         .metric-value {
             font-size: 1.3em;
             font-weight: bold;
-            color: #333;
+            color: var(--color-text-primary);
         }
 
         .threshold-info {
@@ -286,12 +715,12 @@
 
         .history-section h2 {
             margin-bottom: 20px;
-            color: #2c3e50;
+            color: var(--color-text-primary);
         }
 
         .history-item {
             padding: 15px;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid var(--color-border-light);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -303,23 +732,23 @@
 
         .history-game {
             font-weight: bold;
-            color: #333;
+            color: var(--color-text-primary);
         }
 
         .history-threshold {
-            color: #2c3e50;
+            color: var(--color-text-primary);
             font-weight: bold;
         }
 
         .history-time {
-            color: #666;
+            color: var(--color-text-tertiary);
             font-size: 0.9em;
         }
 
         .loading {
             text-align: center;
             padding: 50px;
-            color: #666;
+            color: var(--color-text-tertiary);
             font-size: 1.2em;
         }
 
@@ -330,15 +759,45 @@
             margin-top: 20px;
             min-height: 400px;
             position: relative;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        
+        @media (min-width: 1600px) {
+            .skeleton-loader {
+                grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            }
+        }
+        
+        @media (max-width: 1200px) {
+            .skeleton-loader {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .skeleton-loader {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .skeleton-loader.vertical {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 25px;
         }
 
         .skeleton-card {
-            background: white;
+            background: var(--color-bg-primary);
             border-radius: 15px;
-            padding: 25px;
+            padding: 18px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             opacity: 1;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         .skeleton-line {
@@ -473,6 +932,7 @@
             color: #3b82f6;
             font-size: 0.85em;
             margin-left: 5px;
+            z-index: 10001;
         }
 
         .info-tooltip .tooltip-text {
@@ -482,32 +942,31 @@
             color: #fff;
             text-align: left;
             border-radius: 8px;
-            padding: 12px 16px;
+            padding: 14px 18px;
             position: absolute;
-            z-index: 1000;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            white-space: nowrap;
-            font-size: 0.9em;
+            z-index: 99999;
+            font-size: 2em;
+            white-space: normal;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             transition: opacity 0.3s, visibility 0.3s;
             pointer-events: none;
             max-width: 400px;
             min-width: 300px;
-            white-space: normal;
             line-height: 1.5;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-80%) translateY(-8px);
         }
 
         .info-tooltip .tooltip-text::after {
             content: "";
             position: absolute;
-            top: 100%;
-            left: 50%;
-            margin-left: -5px;
-            border-width: 5px;
+            bottom: -12px;
+            left: 78%;
+            transform: translateX(12%);
+            border-width: 6px;
             border-style: solid;
-            border-color: #1f2937 transparent transparent transparent;
+            border-color: transparent transparent #1f2937 transparent;
         }
 
         .info-tooltip:hover .tooltip-text,
@@ -519,7 +978,7 @@
         @media (max-width: 768px) {
             .info-tooltip .tooltip-text {
                 left: 0;
-                transform: translateX(0);
+                transform: translateX(0) translateY(-8px);
                 max-width: 320px;
                 min-width: 280px;
             }
@@ -568,14 +1027,429 @@
             opacity: 1;
             transition: opacity 0.3s ease;
         }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .modal-label {
+            display: block;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1em;
+            margin-bottom: 8px;
+            transition: border-color 0.3s ease;
+        }
+
+        .modal-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .modal-hint {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .modal-range {
+            font-size: 0.9em;
+            color: #667eea;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+
+        .modal-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .modal-btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .modal-btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .modal-btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .modal-error {
+            color: #ef4444;
+            font-size: 0.85em;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .modal-error.show {
+            display: block;
+        }
+
+        /* Comparison Feature Styles */
+        .compare-toggle {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 10;
+        }
+
+        .compare-checkbox {
+            display: none;
+        }
+
+        .compare-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 8px 12px;
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 500;
+            color: #667eea;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .compare-label:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: scale(1.05);
+        }
+
+        .compare-checkbox:checked + .compare-label {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .compare-checkbox:checked + .compare-label::before {
+            content: "✓ ";
+            font-weight: bold;
+        }
+
+        .game-card.comparing {
+            border: 2px solid #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        /* Comparison Bar */
+        .comparison-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--color-comparison-bg);
+            color: var(--color-text-primary);
+            padding: 20px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            border-top: 1px solid var(--color-border);
+            z-index: 1000;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .comparison-bar.active {
+            transform: translateY(0);
+        }
+
+        .comparison-bar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        .comparison-bar-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .comparison-close {
+            background: var(--color-bg-tertiary);
+            border: 1px solid var(--color-border);
+            color: var(--color-text-primary);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .comparison-close:hover {
+            background: var(--color-bg-secondary);
+            transform: rotate(90deg);
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .comparison-card {
+            background: var(--color-bg-secondary);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid var(--color-border);
+            transition: all 0.3s ease;
+        }
+
+        .comparison-card:hover {
+            background: var(--color-bg-tertiary);
+            transform: translateY(-2px);
+            border-color: var(--color-primary);
+        }
+
+        .comparison-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .comparison-card-name {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .comparison-card-rank {
+            background: var(--color-bg-tertiary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .comparison-table-header {
+            display: none; /* Hidden by default, shown via inline style when needed */
+        }
+
+        .comparison-metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--color-border);
+            border-radius: 4px;
+            margin: 2px 0;
+            transition: background 0.2s ease;
+        }
+
+        .comparison-metric:last-child {
+            border-bottom: none;
+        }
+
+        .comparison-metric-label {
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+
+        .comparison-metric-value {
+            font-weight: bold;
+            font-size: 1em;
+            text-align: right;
+        }
+
+        .comparison-recommendation {
+            background: var(--color-bg-tertiary);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .comparison-empty {
+            text-align: center;
+            padding: 40px;
+            opacity: 0.8;
+        }
+
+        .premium-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: #78350f;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: bold;
+            margin-left: 8px;
+            text-transform: uppercase;
+        }
+
+        body.comparison-active {
+            padding-bottom: 400px;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .compare-label {
+                font-size: 0.75em;
+                padding: 6px 10px;
+            }
+        }
     </style>
 </head>
 <body>
+    {% include 'nav.html' %}
+
+    <!-- Threshold Edit Modal -->
+    <div id="thresholdModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">Edit Threshold Settings</div>
+            <form id="thresholdForm">
+                <div>
+                    <label class="modal-label" for="minThreshold">Alert Threshold</label>
+                    <input type="text" id="minThreshold" class="modal-input" placeholder="Enter amount">
+                    <div class="modal-hint">Current: <span id="currentMin">$0</span></div>
+                    <div class="modal-range" id="thresholdRange"></div>
+                    <div class="modal-error" id="minError"></div>
+                    <div class="modal-hint" style="margin-top: 8px; font-size: 0.85em; color: #666;">
+                        You'll receive an alert when the jackpot reaches this amount.
+                    </div>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="modal-btn modal-btn-secondary" onclick="closeThresholdModal()">Cancel</button>
+                    <button type="submit" class="modal-btn modal-btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Premium Gate Modal -->
+    <div id="premiumGateModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">Premium Feature</div>
+            <div style="padding: 20px 0;">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="font-size: 3em; margin-bottom: 10px;">🔒</div>
+                    <h2 style="margin: 0 0 10px 0; color: #2c3e50;">Upgrade to Premium</h2>
+                    <p style="color: #666; margin: 0;" id="premiumGateMessage">This feature is available for Premium and Pro subscribers.</p>
+                </div>
+                <div style="background: #f8f9fa; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+                    <div style="font-weight: 600; margin-bottom: 10px; color: #2c3e50;">Premium features include:</div>
+                    <ul style="margin: 0; padding-left: 20px; color: #666;">
+                        <li>Subscribe to ALL games (unlimited)</li>
+                        <li>Unlimited alerts per game</li>
+                        <li>Game comparison feature</li>
+                        <li>Custom thresholds per game</li>
+                        <li>EV-driven buy/skip signals</li>
+                    </ul>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="modal-btn modal-btn-secondary" onclick="closePremiumGateModal()">Maybe Later</button>
+                    <button type="button" class="modal-btn modal-btn-primary" onclick="window.location.href='/pricing'">View Pricing</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="container">
         <div class="header">
-            <h1>🎰 Lottery Assistant Dashboard</h1>
-            <div class="timestamp" id="timestamp">Loading...</div>
-            <button class="refresh-btn" onclick="loadData(true)">🔄 Refresh (Fetch Latest)</button>
+            <div class="header-content">
+                <h1>Dashboard</h1>
+                <div class="timestamp" id="timestamp">Loading...</div>
+            </div>
+            <div class="header-controls">
+                <div class="view-toggle">
+                    <button id="view-normal" class="active" onclick="setViewMode('normal')">Grid</button>
+                    <button id="view-vertical" onclick="setViewMode('vertical')">Vertical</button>
+                </div>
+                <button class="refresh-btn" onclick="loadData(true)">🔄 Refresh</button>
+            </div>
         </div>
 
         <div id="loading" class="loading" style="display: none;">
@@ -727,8 +1601,36 @@
         <div id="games-container" class="games-grid" style="display: none;"></div>
 
         <div id="history-container" class="history-section" style="display: none; margin-top: 30px;">
-            <h2>📊 Recent Threshold Alerts</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 style="margin: 0;">📊 Recent Threshold Alerts</h2>
+                <div id="export-buttons" style="display: flex; gap: 10px;">
+                    <button id="export-json-btn" onclick="exportData('json')" 
+                            style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9em; display: none;">
+                        Export JSON
+                    </button>
+                    <button id="export-csv-btn" onclick="exportData('csv')" 
+                            style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9em; display: none;">
+                        Export CSV
+                    </button>
+                </div>
+            </div>
             <div id="history-list"></div>
+        </div>
+    </div>
+
+    <!-- Comparison Bar -->
+    <div id="comparison-bar" class="comparison-bar">
+        <div class="comparison-bar-header">
+            <div class="comparison-bar-title">
+                📊 Compare Games
+                <span id="comparison-count" style="background: var(--color-bg-tertiary); padding: 4px 12px; border-radius: 20px; font-size: 0.7em;">0</span>
+            </div>
+            <button class="comparison-close" onclick="clearComparison()" title="Clear comparison">×</button>
+        </div>
+        <div id="comparison-content">
+            <div class="comparison-empty">
+                Select games to compare by clicking the "Compare" checkbox on each game card
+            </div>
         </div>
     </div>
 
@@ -755,111 +1657,480 @@
             return date.toLocaleString();
         }
 
+        function setViewMode(mode) {
+            const gamesContainer = document.getElementById('games-container');
+            if (!gamesContainer) return;
+            
+            const buttons = ['view-normal', 'view-vertical'];
+            
+            // Remove all view classes
+            gamesContainer.classList.remove('vertical');
+            
+            // Add active class to button
+            buttons.forEach(btnId => {
+                const btn = document.getElementById(btnId);
+                if (btn) {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            const activeBtn = document.getElementById(`view-${mode}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+            
+            // Apply view mode class and update display
+            if (mode === 'vertical') {
+                gamesContainer.classList.add('vertical');
+                gamesContainer.style.display = 'flex';
+                gamesContainer.style.flexDirection = 'column';
+                gamesContainer.style.gridTemplateColumns = 'none';
+            } else {
+                // Grid mode - adjust columns based on number of games
+                gamesContainer.classList.remove('vertical');
+                const gameCards = gamesContainer.querySelectorAll('.game-card');
+                const gameCount = gameCards.length;
+                
+                gamesContainer.style.display = 'grid';
+                gamesContainer.style.flexDirection = 'none';
+                
+                if (gameCount === 1) {
+                    gamesContainer.style.gridTemplateColumns = '1fr';
+                } else if (gameCount === 2) {
+                    gamesContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
+                } else if (gameCount === 3) {
+                    gamesContainer.style.gridTemplateColumns = 'repeat(3, 1fr)';
+                } else {
+                    gamesContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(350px, 1fr))';
+                }
+            }
+            
+            // Save preference
+            localStorage.setItem('dashboardViewMode', mode);
+        }
+
+        // Load saved view mode preference
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedMode = localStorage.getItem('dashboardViewMode') || 'normal';
+            // Ensure saved mode is not 'compact' (removed feature)
+            if (savedMode === 'compact') {
+                localStorage.setItem('dashboardViewMode', 'normal');
+            }
+            setViewMode(savedMode);
+        });
+
         function getEVBadgeClass(evResult) {
-            // Use EV tier class if available, otherwise fall back to old system
+            // Enhanced color coding aligned with -20% goal metric
             if (evResult.ev_tier_class) return evResult.ev_tier_class;
-            if (evResult.is_positive_ev) return 'ev-positive';
-            if (evResult.is_recommended) return 'ev-warning';
-            return 'ev-negative';
+            
+            const evPercent = evResult.ev_percentage || 0;
+            
+            // Color tiers matching the goal threshold system
+            if (evPercent >= 0) return 'ev-positive'; // Green - Positive EV
+            if (evPercent >= -20) return 'ev-warning'; // Green/Yellow - Acceptable EV (≥ -20%)
+            if (evPercent >= -50) return 'ev-bad'; // Yellow - Poor EV (-50% to -20%)
+            return 'ev-terrible'; // Red - Terrible EV (< -50%)
+        }
+
+        function getEVBadgeLabel(evResult) {
+            // Tiered labels based on EV range - more nuanced and less discouraging
+            const evPercent = evResult.ev_percentage || 0;
+            
+            if (evPercent >= 50) return 'Rare Value';
+            if (evPercent >= 10) return 'Good Value';
+            if (evPercent >= 0) return 'Fair Value';
+            if (evPercent >= -20) return 'Weak EV';
+            if (evPercent >= -50) return 'Poor EV';
+            return 'Terrible EV';
         }
 
         function getEVBadgeText(evResult) {
-            // Use EV tier label if available, otherwise fall back to old system
-            if (evResult.ev_tier) return evResult.ev_tier;
-            if (evResult.is_positive_ev) return '✅ Positive EV';
-            if (evResult.is_recommended) return '⚠️ Near Break-Even';
-            return '❌ Negative EV';
+            // Use tiered labels for better clarity
+            return getEVBadgeLabel(evResult);
         }
 
         function renderGameCard(gameId, gameData) {
             const changeClass = gameData.change > 0 ? 'positive' : gameData.change < 0 ? 'negative' : 'neutral';
             const changeSymbol = gameData.change > 0 ? '↑' : gameData.change < 0 ? '↓' : '➡️';
             
+            // Check if user can use comparison feature
+            const canCompareGames = (window.entitlements && window.entitlements.can_compare_games === true)
+                || window.userSubscriptionTier === 'premium'
+                || window.userSubscriptionTier === 'pro'
+                || window.userSubscriptionTier === 'admin';
+            
             return `
-                <div class="game-card">
+                <div class="game-card" data-game-id="${gameId}" id="game-card-${gameId}">
+                    ${canCompareGames ? `
+                    <div class="compare-toggle">
+                        <input type="checkbox" 
+                               class="compare-checkbox" 
+                               id="compare-${gameId}" 
+                               data-game-id="${gameId}"
+                               onchange="toggleComparison('${gameId}')">
+                        <label for="compare-${gameId}" class="compare-label" title="Add to comparison">
+                            Compare
+                        </label>
+                    </div>
+                    ` : `
+                    <div class="compare-toggle">
+                        <label class="compare-label" style="cursor: not-allowed; opacity: 0.6;" 
+                               onclick="showPremiumGate()" title="Premium feature - Upgrade to compare games">
+                            Compare <span class="premium-badge">Premium</span>
+                        </label>
+                    </div>
+                    `}
                     <div class="game-header">
                         <div class="game-name">${gameData.name}</div>
-                        <div class="ev-badge ${getEVBadgeClass(gameData)}">${getEVBadgeText(gameData)}</div>
                     </div>
                     
-                    <div class="jackpot">${formatCurrency(gameData.current_jackpot)}</div>
-                    
-                    ${gameData.change !== 0 ? `
-                    <div class="change ${changeClass}">
-                        ${changeSymbol} ${formatCurrency(Math.abs(gameData.change))} 
-                        ${gameData.change_percent !== 0 ? `(${gameData.change_percent > 0 ? '+' : ''}${formatNumber(gameData.change_percent)}%)` : ''}
-                    </div>
-                    ` : ''}
-                    
-                    <div class="metrics">
-                        <div class="metric">
-                            <div class="metric-label">Net EV</div>
-                            <div class="metric-value">${formatCurrency(gameData.net_ev)}</div>
-                        </div>
-                        <div class="metric">
-                            <div class="metric-label">EV %</div>
-                            <div class="metric-value">${formatNumber(gameData.ev_percentage)}%</div>
-                        </div>
-                        <div class="metric">
-                            <div class="metric-label">Ticket Cost</div>
-                            <div class="metric-value">${formatCurrency(gameData.ticket_cost)}</div>
-                        </div>
-                        <div class="metric">
-                            <div class="metric-label">Odds</div>
-                            <div class="metric-value">1 in ${gameData.odds.toLocaleString()}</div>
-                        </div>
+                    <div class="jackpot">
+                        ${formatCurrency(gameData.current_jackpot)}
                     </div>
                     
-                    ${gameData.buy_signal ? `
-                        <div style="margin-top: 15px; padding: 12px; background: ${gameData.buy_signal_confidence === 'high' ? '#dcfce7' : gameData.buy_signal_confidence === 'medium' ? '#fef3c7' : '#fee2e2'}; border-radius: 8px; border-left: 4px solid ${gameData.buy_signal_confidence === 'high' ? '#10b981' : gameData.buy_signal_confidence === 'medium' ? '#f59e0b' : '#ef4444'};">
-                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
-                                <strong style="color: ${gameData.buy_signal_confidence === 'high' ? '#065f46' : gameData.buy_signal_confidence === 'medium' ? '#92400e' : '#991b1b'}; font-size: 1em;">
-                                    ${gameData.buy_signal_message || '🟡 Consider Buying'}
-                                </strong>
-                                <span class="info-tooltip" onclick="event.stopPropagation(); this.classList.toggle('active');">
-                                    ℹ️
-                                    <span class="tooltip-text">
-                                        ${gameData.buy_signal_confidence === 'high' ? 'Strong Buy = Positive expected value (actually profitable). High confidence this is worth buying.' : 
-                                          gameData.buy_signal_confidence === 'medium' ? 'Consider Buying = Acceptable expected value or multiple criteria met. Medium confidence - worth considering.' : 
-                                          'Not Recommended = Criteria met (large jackpot/rollovers) but expected value is terrible. Low confidence - not a good bet mathematically.'}
-                                        <br><br>Generated by analytics model, not official lottery messaging.
-                                    </span>
-                                </span>
-                            </div>
-                            ${gameData.buy_signal_reasons && gameData.buy_signal_reasons.length > 0 ? `
-                                <div style="font-size: 0.85em; color: #666; line-height: 1.6; margin-top: 8px;">
-                                    <div style="font-weight: 600; margin-bottom: 4px; color: #555;">Reasons:</div>
-                                    <ul style="margin: 0; padding-left: 20px;">
-                                        ${gameData.buy_signal_reasons.map(reason => `<li style="margin-bottom: 4px;">${reason}</li>`).join('')}
-                                    </ul>
+                    ${(() => {
+                        // Compact single-line change ticker under the jackpot
+                        if (gameData.change !== 0) {
+                            const isReset = gameData.change < 0 && Math.abs(gameData.change) > gameData.current_jackpot * 0.5;
+                            if (isReset) {
+                                return `
+                                <div style="margin-top: 4px; font-size: 0.9em; color: #6b21a8;">
+                                    🎉 Jackpot reset (recent winner)
                                 </div>
-                            ` : ''}
-                        </div>
-                    ` : ''}
+                                `;
+                            }
+                            
+                            return `
+                            <div style="margin-top: 4px; font-size: 0.9em; color: ${gameData.change > 0 ? '#059669' : '#b91c1c'};">
+                                ${gameData.change > 0 ? '▲' : '▼'} ${gameData.change > 0 ? '+' : ''}${formatCurrency(Math.abs(gameData.change))}
+                                ${gameData.change_percent !== 0 ? ` (${gameData.change_percent > 0 ? '+' : ''}${formatNumber(gameData.change_percent)}%)` : ''}
+                                <span style="opacity: 0.8;">since last draw</span>
+                            </div>
+                            `;
+                        } else if (gameData.last_jackpot > 0 && gameData.last_jackpot === gameData.current_jackpot) {
+                            return `
+                            <div style="margin-top: 4px; font-size: 0.85em; color: #6b7280;">
+                                → No change since last draw
+                            </div>
+                            `;
+                        }
+                        return '';
+                    })()}
                     
-                    ${gameData.min_threshold ? `
-                        <div class="threshold-info">
-                            <h4>🎯 Threshold Status</h4>
-                            <p>Minimum: ${formatCurrency(gameData.min_threshold)}</p>
-                            <p>Last Hit: ${gameData.last_threshold > 0 ? formatCurrency(gameData.last_threshold) : 'Never'}</p>
-                            <p>Total Alerts: ${gameData.thresholds_hit_count}</p>
-                            ${gameData.last_alert_time ? `<p>Last Alert: ${formatDate(gameData.last_alert_time)}</p>` : ''}
+                    <!-- User-Friendly EV Display -->
+                    <div style="margin-top: 12px; padding: 12px; background: #f8f9fa; border-radius: 10px; border: 1px solid #e9ecef;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <div style="flex: 1;">
+                                <div style="font-size: 0.8em; color: #666; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 2px;">Expected Value</div>
+                                <div style="font-size: 1.4em; font-weight: 700; color: ${gameData.net_ev >= 0 ? '#047857' : '#b91c1c'};">
+                                    ${gameData.net_ev >= 0 ? '+' : ''}${formatCurrency(gameData.net_ev)}
+                                </div>
+                            </div>
+                            <div class="ev-badge ${getEVBadgeClass(gameData)}" style="margin-left: 12px; flex-shrink: 0;">
+                                ${getEVBadgeText(gameData)}
+                            </div>
                         </div>
-                    ` : ''}
+                        <div style="font-size: 0.85em; color: #555; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                            <span>EV: ${formatNumber(gameData.ev_percentage)}%</span>
+                            <span>• 🎟 ${formatCurrency(gameData.ticket_cost)}</span>
+                            <span>• 🎯 1 in ${gameData.odds.toLocaleString()}</span>
+                        </div>
+                        ${(() => {
+                            // Show progress to acceptable EV threshold (-20%) - more realistic and actionable
+                            // This answers: "How close is this to being not-terrible?"
+                            const currentEVPercent = gameData.ev_percentage || 0;
+                            // TODO: Premium feature - Allow users to customize threshold (-10%, -20%, -30%)
+                            // const acceptableEVThreshold = window.userEVThreshold || -20;
+                            const acceptableEVThreshold = -20; // -20% EV = "less stupid gambling"
+                            
+                            let progressPercent = 0;
+                            let progressText = '';
+                            let progressColor = '#ef4444';
+                            
+                            if (gameData.is_positive_ev) {
+                                // Already at +EV
+                                progressPercent = 100;
+                                progressText = '✅ Positive EV achieved!';
+                                progressColor = '#10b981';
+                            } else if (currentEVPercent >= acceptableEVThreshold) {
+                                // Already at acceptable EV
+                                progressPercent = 100;
+                                progressText = `✅ Acceptable EV (${formatNumber(currentEVPercent)}%)`;
+                                progressColor = '#10b981';
+                            } else {
+                                // Calculate progress from current EV to acceptable threshold
+                                // Progress from worst (-100%) to acceptable (-20%)
+                                const worstEV = -100;
+                                const range = acceptableEVThreshold - worstEV; // -20 - (-100) = 80
+                                const currentProgress = currentEVPercent - worstEV; // e.g., -75.85 - (-100) = 24.15
+                                progressPercent = Math.max(0, Math.min(100, (currentProgress / range) * 100));
+                                
+                                const remainingEV = acceptableEVThreshold - currentEVPercent;
+                                // Clarify: "X% of the way" is more accurate than "X% to"
+                                progressText = `${formatNumber(progressPercent)}% of the way to acceptable EV`;
+                                progressColor = progressPercent >= 50 ? '#fbbf24' : progressPercent >= 25 ? '#f59e0b' : '#ef4444';
+                            }
+                            
+                            return `
+                            <div class="ev-progress-container">
+                                <div class="ev-progress-label" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div style="display: flex; flex-direction: column; gap: 2px;">
+                                        <span style="font-size: 0.75em; color: #666;">Current EV</span>
+                                        <span style="font-weight: 700; font-size: 1.1em; color: ${(() => {
+                                            if (currentEVPercent >= 0) return '#10b981';
+                                            if (currentEVPercent >= -20) return '#10b981';
+                                            if (currentEVPercent >= -50) return '#fbbf24';
+                                            return '#ef4444';
+                                        })()}">
+                                            ${formatNumber(currentEVPercent)}%
+                                        </span>
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; gap: 2px; text-align: right;">
+                                        <span style="font-size: 0.75em; color: #666;">
+                                            Goal
+                                            <span class="info-tooltip" style="cursor: help; margin-left: 4px; font-size: 0.9em; position: relative; display: inline-block;" 
+                                                  onclick="event.stopPropagation(); this.classList.toggle('active');">
+                                                ℹ️
+                                                <span class="tooltip-text" style="width: 350px; line-height: 1.4; white-space: normal;">
+                                                    <strong>-20% EV Goal</strong><br>
+                                                    For every $1 spent, you get at least $0.80 back in expected value. This is considered an acceptable entertainment value threshold - "less stupid gambling."
+                                                </span>
+                                            </span>
+                                        </span>
+                                        <span style="font-weight: 700; font-size: 1.1em; color: #10b981;">
+                                            ≥ ${acceptableEVThreshold}%
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="ev-progress-bar" style="margin-bottom: 6px;">
+                                    <div class="ev-progress-fill" style="width: ${progressPercent}%;"></div>
+                                </div>
+                                ${progressText && (gameData.is_positive_ev || currentEVPercent >= acceptableEVThreshold) ? `
+                                <div class="ev-progress-text" style="text-align: center; font-size: 0.85em; color: #666; font-weight: 600;">
+                                    ${progressText}
+                                </div>
+                                ` : ''}
+                            </div>
+                            `;
+                        })()}
+                    </div>
                     
-                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #f0f0f0; color: #666; font-size: 0.9em;">
-                        <div style="margin-bottom: 8px;">
-                            <strong>Next draw in:</strong> ${gameData.time_to_draw || 'Unknown'}
-                            ${(gameData.rollover_count !== undefined && gameData.rollover_count !== null) ? `<span style="color: #999; margin-left: 12px;">Rollovers: ${gameData.rollover_count}</span>` : ''}
-                        </div>
-                        <div style="margin-bottom: 8px;">Draw Time: ${gameData.draw_time || 'N/A'}</div>
-                        <div style="position: relative; display: inline-block;">
-                            Break-Even: ${formatCurrency(gameData.break_even_jackpot)}
+                    ${(() => {
+                        // Buy signals are unlimited - always show if available
+                        // Always show recommendation, even if no buy signal
+                        let recommendationMessage = '';
+                        let confidence = 'low';
+                        // Softer, less shouty defaults
+                        let backgroundColor = '#f3f4f6';
+                        let borderColor = '#d1d5db';
+                        let textColor = '#374151';
+                        
+                        if (gameData.buy_signal) {
+                            // Use buy signal data if available
+                            confidence = gameData.buy_signal_confidence || 'low';
+                            recommendationMessage = gameData.buy_signal_message || '🟠 Not Recommended';
+                        } else {
+                            // Generate recommendation based on EV if no buy signal
+                            if (gameData.is_positive_ev) {
+                                recommendationMessage = '⭐ Opportunity';
+                                confidence = 'high';
+                            } else {
+                                recommendationMessage = '⛔ Not Recommended';
+                                confidence = 'low';
+                            }
+                        }
+                        
+                        // Set colors based on confidence
+                        if (confidence === 'high') {
+                            backgroundColor = '#dcfce7';
+                            borderColor = '#10b981';
+                            textColor = '#065f46';
+                        } else if (confidence === 'medium') {
+                            backgroundColor = '#fef3c7';
+                            borderColor = '#f59e0b';
+                            textColor = '#92400e';
+                        }
+                        
+                        return `
+                        <div style="margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.85em; flex-wrap: wrap;">
+                            <span style="padding: 4px 10px; border-radius: 999px; background: ${backgroundColor}; border: 1px solid ${borderColor}; color: ${textColor}; font-weight: 600;">
+                                ${recommendationMessage}
+                            </span>
+                            <span style="color: var(--color-text-tertiary);">
+                                ${confidence === 'high' ? 'Model sees strong value here.' : confidence === 'medium' ? 'Worth watching; conditions are improving.' : 'Low value based on current EV and growth.'}
+                            </span>
                             <span class="info-tooltip" onclick="event.stopPropagation(); this.classList.toggle('active');">
                                 ℹ️
-                                <span class="tooltip-text">Break-even = jackpot size where expected value of a single ticket becomes non-negative, assuming cash value and no taxes.</span>
+                                <span class="tooltip-text">
+                                    ${confidence === 'high' ? '⭐ Opportunity = Positive or near-positive expected value with strong supporting signals.' : 
+                                      confidence === 'medium' ? '⚠ Watchlist = EV and momentum are improving but not yet compelling.' : 
+                                      '⛔ Not Recommended = Expected value is negative with weak supporting signals.'}
+                                    <br><br>Generated by analytics model, not official lottery messaging.
+                                </span>
                             </span>
                         </div>
+                        `;
+                    })()}
+                    
+                    <!-- Actions Section -->
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e9ecef; display: block !important; visibility: visible !important;">
+                        <div class="collapsible-section" style="border: 1px solid #e9ecef; border-radius: 8px; overflow: hidden; display: block !important; visibility: visible !important;">
+                            <div class="collapsible-header" onclick="toggleCollapsible('subscription-${gameId}')" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #f8f9fa; cursor: pointer; user-select: none;">
+                                <div style="font-weight: 600; color: #2c3e50; font-size: 0.9em;">📱 Actions</div>
+                                <span class="collapsible-icon" id="icon-subscription-${gameId}" style="transition: transform 0.2s;">▼</span>
+                            </div>
+                            <div class="collapsible-content" id="subscription-${gameId}" style="display: none; padding: 12px; background: white;">
+                                ${!['pick_3', 'pick_4', 'hot_wins'].includes(gameId) ? `
+                                <div style="padding: 10px; background: #f0f4ff; border-radius: 8px; border: 1px solid #667eea; margin-bottom: 12px;">
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                        <div style="font-weight: 600; color: #2c3e50; font-size: 0.9em;">Telegram Alerts</div>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" 
+                                                   class="game-subscription-checkbox" 
+                                                   data-game-id="${gameId}"
+                                                   id="subscribe-${gameId}"
+                                                   onchange="toggleGameSubscription('${gameId}')"
+                                                   style="width: 18px; height: 18px; cursor: pointer;">
+                                            <span style="font-size: 0.9em; color: #667eea; font-weight: 500;" id="subscribe-label-${gameId}">
+                                                Subscribe
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div style="font-size: 0.8em; color: #666; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(102, 126, 234, 0.2);" id="subscription-info-${gameId}">
+                                        <span id="subscription-status-${gameId}">Not subscribed</span>
+                                        <span id="subscription-limit-${gameId}" style="display: none; color: #f59e0b; margin-left: 8px;"></span>
+                                    </div>
+                                </div>
+                                ` : ''}
+                                
+                                ${['pick_3', 'pick_4', 'hot_wins'].includes(gameId) ? `
+                                <div style="padding: 10px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef;">
+                                    <div style="font-weight: 600; color: #2c3e50; font-size: 0.9em; margin-bottom: 8px;">Quick Links</div>
+                                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                                        ${gameId === 'pick_3' ? `
+                                            <a href="https://www.illinoislottery.com/dbg/play/pick3" target="_blank" style="padding: 8px 12px; background: white; border: 1px solid #667eea; border-radius: 6px; text-decoration: none; color: #667eea; font-size: 0.85em; display: flex; align-items: center; gap: 8px;">
+                                                🎲 Play Pick 3 on Illinois Lottery
+                                            </a>
+                                            <a href="https://www.illinoislottery.com/dbg/results/pick3" target="_blank" style="padding: 8px 12px; background: white; border: 1px solid #667eea; border-radius: 6px; text-decoration: none; color: #667eea; font-size: 0.85em; display: flex; align-items: center; gap: 8px;">
+                                                📊 View Pick 3 Results & History
+                                            </a>
+                                            <div style="padding: 8px 12px; background: white; border: 1px solid #e9ecef; border-radius: 6px; font-size: 0.8em; color: #666;">
+                                                <strong>Fixed Prizes:</strong> Straight: $500 | Box: $80 | Front/Back Pair: $50
+                                            </div>
+                                        ` : gameId === 'pick_4' ? `
+                                            <a href="https://www.illinoislottery.com/dbg/play/pick4" target="_blank" style="padding: 8px 12px; background: white; border: 1px solid #667eea; border-radius: 6px; text-decoration: none; color: #667eea; font-size: 0.85em; display: flex; align-items: center; gap: 8px;">
+                                                🎲 Play Pick 4 on Illinois Lottery
+                                            </a>
+                                            <a href="https://www.illinoislottery.com/dbg/results/pick4" target="_blank" style="padding: 8px 12px; background: white; border: 1px solid #667eea; border-radius: 6px; text-decoration: none; color: #667eea; font-size: 0.85em; display: flex; align-items: center; gap: 8px;">
+                                                📊 View Pick 4 Results & History
+                                            </a>
+                                            <div style="padding: 8px 12px; background: white; border: 1px solid #e9ecef; border-radius: 6px; font-size: 0.8em; color: #666;">
+                                                <strong>Fixed Prizes:</strong> Straight: $5,000 | Box: $300 | Front/Back Pair: $25
+                                            </div>
+                                        ` : `
+                                            <a href="https://www.illinoislottery.com/dbg/play/hotwins" target="_blank" style="padding: 8px 12px; background: white; border: 1px solid #667eea; border-radius: 6px; text-decoration: none; color: #667eea; font-size: 0.85em; display: flex; align-items: center; gap: 8px;">
+                                                🔥 Play Hot Wins on Illinois Lottery
+                                            </a>
+                                            <a href="https://www.illinoislottery.com/games-hub" target="_blank" style="padding: 8px 12px; background: white; border: 1px solid #667eea; border-radius: 6px; text-decoration: none; color: #667eea; font-size: 0.85em; display: flex; align-items: center; gap: 8px;">
+                                                📊 View All Games & Results
+                                            </a>
+                                            <div style="padding: 8px 12px; background: white; border: 1px solid #e9ecef; border-radius: 6px; font-size: 0.8em; color: #666;">
+                                                <strong>Game Info:</strong> Draws every 4 minutes | Top prize up to $1,000,000
+                                            </div>
+                                        `}
+                                    </div>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Alert Threshold Section (hidden for games without thresholds) -->
+                    ${gameData.min_threshold !== null && gameData.min_threshold !== undefined ? `
+                    <div style="margin-top: 12px;">
+                        <div class="collapsible-section" style="border: 1px solid #e9ecef; border-radius: 8px; overflow: hidden;">
+                            <div class="collapsible-header" onclick="toggleCollapsible('threshold-${gameId}')" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--color-bg-secondary); cursor: pointer; user-select: none;">
+                                <div style="font-weight: 600; color: #2c3e50; font-size: 0.9em;">🎯 Alert Threshold: ${formatCurrency(gameData.min_threshold)}</div>
+                                <span class="collapsible-icon" id="icon-threshold-${gameId}" style="transition: transform 0.2s;">▼</span>
+                            </div>
+                            <div class="collapsible-content" id="threshold-${gameId}" style="display: block; padding: 12px; background: white;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                                    <div style="font-weight: 600; color: #2c3e50; font-size: 0.9em;">Threshold Settings</div>
+                                    <button data-game-id="${gameId}" class="edit-threshold-btn" style="background: var(--color-primary); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85em; font-weight: 500;">Edit</button>
+                                </div>
+                            
+                                <div style="margin-bottom: 10px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                        <span style="font-size: 0.9em; color: #666;">Alert when jackpot reaches:</span>
+                                        <strong style="color: #2c3e50; font-size: 1.1em;">${formatCurrency(gameData.min_threshold)}</strong>
+                                    </div>
+                                    ${gameData.current_jackpot >= gameData.min_threshold ? `
+                                        <div style="padding: 8px; background: #d4edda; border-radius: 6px; margin-top: 8px;">
+                                            <div style="font-size: 0.85em; color: #155724; display: flex; align-items: center; gap: 6px;">
+                                                <span>✓</span>
+                                                <span>Threshold reached! You'll be alerted when this jackpot resets and reaches this level again.</span>
+                                            </div>
+                                        </div>
+                                    ` : `
+                                        <div style="margin-top: 8px;">
+                                            <div style="background: #e9ecef; border-radius: 6px; height: 10px; overflow: hidden;">
+                                                <div style="background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-dark) 100%); height: 100%; width: ${(() => {
+                                                    const progress = gameData.threshold_progress !== null && gameData.threshold_progress !== undefined 
+                                                        ? gameData.threshold_progress 
+                                                        : gameData.current_jackpot && gameData.min_threshold 
+                                                            ? Math.min(100, Math.max(0, (gameData.current_jackpot / gameData.min_threshold) * 100))
+                                                            : 0;
+                                                    return Math.min(100, Math.max(0, progress));
+                                                })()}%; transition: width 0.3s ease;"></div>
+                                            </div>
+                                            <div style="text-align: center; margin-top: 6px; font-size: 0.8em; color: #666;">
+                                                ${(() => {
+                                                    const progress = gameData.threshold_progress !== null && gameData.threshold_progress !== undefined 
+                                                        ? gameData.threshold_progress 
+                                                        : gameData.current_jackpot && gameData.min_threshold 
+                                                            ? Math.min(100, Math.max(0, (gameData.current_jackpot / gameData.min_threshold) * 100))
+                                                            : 0;
+                                                    return Math.round(progress);
+                                                })()}% to threshold
+                                            </div>
+                                        </div>
+                                    `}
+                                </div>
+                            
+                                ${gameData.thresholds_hit_count > 0 ? `
+                                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e9ecef;">
+                                        <div style="font-size: 0.75em; color: #666; margin-bottom: 4px;">Alerts Sent</div>
+                                        <div style="font-weight: 600; color: #2c3e50; font-size: 1.1em;">${gameData.thresholds_hit_count}</div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    <!-- Time & Rollover Footer (Inside Card) -->
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e9ecef; display: flex; gap: 12px; align-items: center; justify-content: center; flex-wrap: wrap; font-size: 0.85em; color: #666; background: #f8f9fa; padding: 10px; border-radius: 6px; visibility: visible !important; display: flex !important;">
+                        <span class="info-tooltip" style="cursor: help;">
+                            ⏱ ${gameData.time_to_draw || 'Unknown'}
+                            <span class="tooltip-text" style="width: 250px;">
+                                <strong>Next Draw</strong><br>
+                                ${gameData.time_to_draw || 'Unknown'} until next drawing<br>
+                                ${gameData.draw_time ? `Draw time: ${gameData.draw_time}` : ''}
+                            </span>
+                        </span>
+                        ${(gameData.rollover_count !== undefined && gameData.rollover_count !== null) ? `
+                            <span style="margin: 0 4px;">•</span>
+                            <span class="info-tooltip" style="cursor: help;">
+                                🔁 ${gameData.rollover_count} rollover${gameData.rollover_count !== 1 ? 's' : ''}
+                                <span class="tooltip-text" style="width: 300px;">
+                                    <strong>Rollover Count: ${gameData.rollover_count}</strong><br>
+                                    This jackpot has rolled over ${gameData.rollover_count} time${gameData.rollover_count !== 1 ? 's' : ''} without a winner.<br><br>
+                                    ${gameData.rollover_count >= 20 ? '🎯 Very high rollover count! Historically, Mega Millions becomes +EV at 20-25 rollovers.' : 
+                                      gameData.rollover_count >= 10 ? '📈 High rollover count. The jackpot is growing with each drawing.' : 
+                                      '📊 The jackpot increases with each rollover, improving expected value.'}
+                                </span>
+                            </span>
+                        ` : ''}
                     </div>
                 </div>
             `;
@@ -870,18 +2141,63 @@
                 return '<p style="color: #666; text-align: center; padding: 20px;">No threshold alerts yet.</p>';
             }
 
-            return history.map(item => `
-                <div class="history-item">
-                    <div>
-                        <div class="history-game">${item.game_name}</div>
-                        <div class="history-time">${formatDate(item.timestamp)}</div>
-                    </div>
-                    <div>
-                        <div class="history-threshold">${formatCurrency(item.threshold)}</div>
-                        <div style="color: #666; font-size: 0.9em;">Jackpot: ${formatCurrency(item.jackpot)}</div>
-                    </div>
+            const historyWindow = window.entitlements?.history_window || 'All history';
+            
+            return `
+                <div style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px; font-size: 0.85em; color: #666;">
+                    Showing: <strong>${historyWindow}</strong>
                 </div>
-            `).join('');
+                ${history.map(item => `
+                    <div class="history-item">
+                        <div>
+                            <div class="history-game">${item.game_name}</div>
+                            <div class="history-time">${formatDate(item.timestamp)}</div>
+                        </div>
+                        <div>
+                            <div class="history-threshold">${formatCurrency(item.threshold)}</div>
+                            <div style="color: #666; font-size: 0.9em;">Jackpot: ${formatCurrency(item.jackpot)}</div>
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+        }
+        
+        // Export data function
+        async function exportData(format) {
+            try {
+                const userId = getUserId();
+                const url = `/api/export?format=${format}&user_id=${encodeURIComponent(userId)}`;
+                
+                const response = await fetch(url, {
+                    headers: { 'X-User-ID': userId }
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    if (response.status === 403) {
+                        if (confirm(`${error.error}\n\nWould you like to upgrade to Pro?`)) {
+                            window.location.href = '/pricing';
+                        }
+                    } else {
+                        alert(`Export failed: ${error.error || 'Unknown error'}`);
+                    }
+                    return;
+                }
+                
+                // Download the file
+                const blob = await response.blob();
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || `lottery-history.${format}`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(downloadUrl);
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('Export failed. Please try again.');
+            }
         }
 
         function showSkeletonLoader() {
@@ -934,32 +2250,51 @@
             `).join('');
             
             // Force show skeleton with proper visibility, hide everything else
-            skeletonContainer.style.cssText = 'display: grid !important; visibility: visible !important; opacity: 1 !important;';
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('games-container').style.display = 'none';
-            document.getElementById('history-container').style.display = 'none';
+            skeletonContainer.style.cssText = 'display: grid !important; visibility: visible !important; opacity: 1 !important; width: 100% !important; max-width: 100% !important;';
+            const loadingEl = document.getElementById('loading');
+            const gamesContainer = document.getElementById('games-container');
+            const historyContainer = document.getElementById('history-container');
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (gamesContainer) {
+                gamesContainer.style.display = 'none';
+                gamesContainer.style.width = '100%';
+                gamesContainer.style.maxWidth = '100%';
+            }
+            if (historyContainer) historyContainer.style.display = 'none';
         }
         
 
-        async function loadData(forceRefresh = false) {
-            // Show skeleton loader immediately with spinner
+        // Track if background refresh is in progress
+        let backgroundRefreshInProgress = false;
+
+        async function loadData(forceRefresh = false, skipSkeleton = false) {
+            // Show skeleton loader immediately with spinner (unless skipping)
             const skeletonLoader = document.getElementById('skeleton-loader');
-            // Always ensure skeleton cards are populated and visible
-            showSkeletonLoader();
+            if (!skipSkeleton) {
+                // Always ensure skeleton cards are populated and visible
+                showSkeletonLoader();
+            } else {
+                // If skipping skeleton, make sure it's hidden
+                skeletonLoader.style.display = 'none';
+                skeletonLoader.style.visibility = 'hidden';
+                skeletonLoader.style.opacity = '0';
+            }
             
             // Record start time to ensure minimum display time
             const loadStartTime = Date.now();
             const minDisplayTime = 500; // Show skeleton for at least 500ms
 
             try {
-                // Load status (use /api/refresh if forceRefresh, otherwise /api/status)
-                // Add cache-busting timestamp to ensure fresh data
+                // Always load from /api/status first (fast) for immediate feedback
+                // If forceRefresh is true, trigger background refresh after showing data
                 const timestamp = new Date().getTime();
-                const endpoint = forceRefresh ? '/api/refresh' : '/api/status';
-                const statusResponse = await fetch(`${endpoint}?_=${timestamp}`, {
+                const endpoint = '/api/status';
+                const statusResponse = await fetch(`${endpoint}?_=${timestamp}&nocache=${Math.random()}`, {
                     cache: 'no-store',
                     headers: {
-                        'Cache-Control': 'no-cache'
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
                     }
                 });
                 
@@ -967,7 +2302,17 @@
                     throw new Error(`HTTP ${statusResponse.status}: ${statusResponse.statusText}`);
                 }
                 
-                const statusData = await statusResponse.json();
+                window.statusData = await statusResponse.json(); // Make globally accessible
+                const statusData = window.statusData;
+                
+                // Store entitlements globally
+                if (statusData.entitlements) {
+                    window.userSubscriptionTier = statusData.entitlements.tier || window.userSubscriptionTier || 'free';
+                    window.entitlements = statusData.entitlements;
+                    // Debug: Log entitlements for admin verification
+                    console.log('User tier:', window.userSubscriptionTier);
+                    console.log('Entitlements:', window.entitlements);
+                }
 
                 if (statusData.error) {
                     throw new Error(statusData.error);
@@ -999,6 +2344,7 @@
                 document.getElementById('timestamp').textContent = 
                     `Last Updated: ${formatDate(statusData.timestamp)}`;
 
+
                 // Render games
                 const gamesContainer = document.getElementById('games-container');
                 
@@ -1029,12 +2375,19 @@
                     nextLDLGame = 'lucky_day_lotto_evening';
                 }
                 
-                // Build game order with only the next LDL draw
+                // Build game order: next LDL draw, then all other games
                 const gameOrder = [];
                 if (nextLDLGame) {
                     gameOrder.push(nextLDLGame);
                 }
-                gameOrder.push('powerball', 'mega_millions');
+                // Add all other games in order
+                const allGames = ['lucky_day_lotto_midday', 'lucky_day_lotto_evening', 'lotto', 'powerball', 'mega_millions', 'pick_3', 'pick_4', 'hot_wins'];
+                for (const gameId of allGames) {
+                    // Skip if already added (LDL) or if game doesn't exist in data
+                    if (gameId !== nextLDLGame && statusData.games[gameId]) {
+                        gameOrder.push(gameId);
+                    }
+                }
 
                 // Ensure minimum display time for skeleton loader before showing data
                 const elapsed = Date.now() - loadStartTime;
@@ -1042,12 +2395,90 @@
                 
                 setTimeout(() => {
                     // Render games after minimum display time
-                    gamesContainer.innerHTML = gameOrder
-                        .filter(id => statusData.games[id])
+                    const availableGames = gameOrder.filter(id => statusData.games[id]);
+                    gamesContainer.innerHTML = availableGames
                         .map(id => renderGameCard(id, statusData.games[id]))
                         .join('');
 
-                    gamesContainer.style.display = 'grid';
+                    // Hide skeleton loader smoothly
+                    const skeletonLoaderEl = document.getElementById('skeleton-loader');
+                    if (skeletonLoaderEl) {
+                        skeletonLoaderEl.style.display = 'none';
+                        skeletonLoaderEl.style.visibility = 'hidden';
+                        skeletonLoaderEl.style.opacity = '0';
+                    }
+                    
+                    // Adjust grid columns based on number of games and view mode
+                    const isVertical = gamesContainer.classList.contains('vertical');
+                    gamesContainer.style.width = '100%';
+                    gamesContainer.style.maxWidth = '100%';
+                    gamesContainer.style.boxSizing = 'border-box';
+                    
+                    if (isVertical) {
+                        gamesContainer.style.display = 'flex';
+                        gamesContainer.style.flexDirection = 'column';
+                    } else {
+                        gamesContainer.style.display = 'grid';
+                        const gameCount = availableGames.length;
+                        if (gameCount === 1) {
+                            gamesContainer.style.gridTemplateColumns = '1fr';
+                        } else if (gameCount === 2) {
+                            gamesContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
+                        } else if (gameCount === 3) {
+                            gamesContainer.style.gridTemplateColumns = 'repeat(3, 1fr)';
+                        } else {
+                            // 4+ games - use auto-fit
+                            gamesContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(350px, 1fr))';
+                        }
+                    }
+                    
+                    // Restore comparison checkboxes state
+                    comparisonGames.forEach(gameId => {
+                        const checkbox = document.getElementById(`compare-${gameId}`);
+                        const gameCard = document.getElementById(`game-card-${gameId}`);
+                        if (checkbox && gameCard) {
+                            checkbox.checked = true;
+                            gameCard.classList.add('comparing');
+                            // Update comparison data
+                            if (statusData.games[gameId]) {
+                                comparisonData[gameId] = statusData.games[gameId];
+                            }
+                        }
+                    });
+                    
+                    // Update comparison bar if games are selected
+                    if (comparisonGames.size > 0) {
+                        updateComparisonBar();
+                    }
+                    
+                    // Initialize subscription checkboxes
+                    const subscriptions = getUserSubscriptions();
+                    subscriptions.forEach(gameId => {
+                        const checkbox = document.getElementById(`subscribe-${gameId}`);
+                        if (checkbox) {
+                            checkbox.checked = true;
+                            updateSubscriptionUI(gameId, true);
+                        }
+                    });
+                    
+                    // Load user subscriptions from API
+                    loadUserSubscriptions();
+                    
+                    // Attach event listeners to edit buttons
+                    gamesContainer.querySelectorAll('.edit-threshold-btn').forEach(btn => {
+                        btn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const gameId = this.getAttribute('data-game-id');
+                            console.log('Edit button clicked for game:', gameId);
+                            if (typeof window.editThreshold === 'function') {
+                                window.editThreshold(gameId);
+                            } else {
+                                console.error('editThreshold function not found');
+                                alert('Edit function not loaded. Please refresh the page.');
+                            }
+                        }, { capture: true });
+                    });
                     
                     // Hide skeleton loader and loading text now that we have data
                     const skeletonLoader = document.getElementById('skeleton-loader');
@@ -1066,8 +2497,118 @@
                 if (!historyData.error) {
                     const historyContainer = document.getElementById('history-container');
                     const historyList = document.getElementById('history-list');
+                    
+                    // Show/hide export buttons based on entitlements
+                    const canExport = window.entitlements?.can_export || false;
+                    const exportJsonBtn = document.getElementById('export-json-btn');
+                    const exportCsvBtn = document.getElementById('export-csv-btn');
+                    
+                    if (canExport) {
+                        if (exportJsonBtn) exportJsonBtn.style.display = 'block';
+                        if (exportCsvBtn) exportCsvBtn.style.display = 'block';
+                    } else {
+                        if (exportJsonBtn) exportJsonBtn.style.display = 'none';
+                        if (exportCsvBtn) exportCsvBtn.style.display = 'none';
+                    }
+                    
                     historyList.innerHTML = renderHistory(historyData.history || []);
                     historyContainer.style.display = 'block';
+                }
+
+                // If forceRefresh was requested, trigger background refresh after showing current data
+                if (forceRefresh && !backgroundRefreshInProgress) {
+                    backgroundRefreshInProgress = true;
+                    
+                    // Update button to show refresh in progress
+                    const refreshBtn = document.querySelector('.refresh-btn');
+                    const originalText = refreshBtn.textContent;
+                    refreshBtn.textContent = '🔄 Fetching Latest...';
+                    refreshBtn.disabled = true;
+                    
+                    // Store original timestamp to detect when data updates
+                    const originalTimestamp = statusData.timestamp;
+                    let pollAttempts = 0;
+                    const maxPollAttempts = 20; // 20 attempts * 0.5s = 10 seconds max
+                    const pollInterval = 500; // Poll every 500ms
+                    
+                    // Create abort controller for timeout
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+                    
+                    // Trigger background refresh (non-blocking)
+                    fetch(`/api/refresh?_=${timestamp}`, {
+                        cache: 'no-store',
+                        headers: {
+                            'Cache-Control': 'no-cache'
+                        },
+                        signal: controller.signal
+                    })
+                    .then(response => {
+                        clearTimeout(timeoutId);
+                        // Accept both 200 (old behavior) and 202 (new non-blocking behavior)
+                        if (response.ok || response.status === 202) {
+                            // Refresh started - poll for completion
+                            const pollForCompletion = () => {
+                                pollAttempts++;
+                                
+                                // Check if we've exceeded max attempts
+                                if (pollAttempts > maxPollAttempts) {
+                                    console.warn('Refresh polling timeout - restoring button');
+                                    refreshBtn.textContent = originalText;
+                                    refreshBtn.disabled = false;
+                                    backgroundRefreshInProgress = false;
+                                    return;
+                                }
+                                
+                                // Poll status endpoint to check for updates
+                                fetch(`/api/status?_=${Date.now()}&nocache=${Math.random()}`, {
+                                    cache: 'no-store',
+                                    headers: {
+                                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                                        'Pragma': 'no-cache',
+                                        'Expires': '0'
+                                    }
+                                })
+                                .then(response => response.json())
+                                .then(newStatusData => {
+                                    // Check if timestamp has changed (data was updated)
+                                    if (newStatusData.timestamp && newStatusData.timestamp !== originalTimestamp) {
+                                        // Data updated! Reload to show new values (skip skeleton since data is already visible)
+                                        refreshBtn.textContent = originalText;
+                                        refreshBtn.disabled = false;
+                                        backgroundRefreshInProgress = false;
+                                        loadData(false, true); // Reload with updated data, skip skeleton
+                                    } else {
+                                        // Not updated yet, continue polling
+                                        setTimeout(pollForCompletion, pollInterval);
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error polling for refresh completion:', error);
+                                    // Continue polling despite error
+                                    setTimeout(pollForCompletion, pollInterval);
+                                });
+                            };
+                            
+                            // Start polling immediately
+                            setTimeout(pollForCompletion, pollInterval);
+                        } else {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                    })
+                    .catch(error => {
+                        clearTimeout(timeoutId);
+                        if (error.name === 'AbortError') {
+                            console.warn('Refresh request timed out after 10 seconds');
+                        } else {
+                            console.error('Background refresh failed:', error);
+                        }
+                        // Don't show error to user since we already have data displayed
+                        // Just restore button state
+                        refreshBtn.textContent = originalText;
+                        refreshBtn.disabled = false;
+                        backgroundRefreshInProgress = false;
+                    });
                 }
 
             } catch (error) {
@@ -1115,26 +2656,677 @@
             showSkeletonLoader();
         }
         
-        // Load data on page load (fast, from state)
-        // Use a small delay to ensure skeleton is visible first
-        setTimeout(() => {
-            loadData(false);
-        }, 100);
+        // Comparison Feature
+        let comparisonGames = new Set();
+        let comparisonData = {};
+        
+        // User subscription tier (can be set from API)
+        window.userSubscriptionTier = window.userSubscriptionTier || 'free'; // Default to free
+        
+        // Subscription Management
+        function getUserId() {
+            // Generate or retrieve user ID from localStorage
+            let userId = localStorage.getItem('lottery_user_id');
+            if (!userId) {
+                userId = 'web_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('lottery_user_id', userId);
+            }
+            return userId;
+        }
+        
+        function getUserSubscriptions() {
+            const userId = getUserId();
+            const stored = localStorage.getItem(`subscriptions_${userId}`);
+            return stored ? JSON.parse(stored) : [];
+        }
+        
+        function saveUserSubscriptions(subscriptions) {
+            const userId = getUserId();
+            localStorage.setItem(`subscriptions_${userId}`, JSON.stringify(subscriptions));
+        }
+        
+        async function toggleGameSubscription(gameId) {
+            const checkbox = document.getElementById(`subscribe-${gameId}`);
+            const subscriptions = getUserSubscriptions();
+            const isSubscribed = subscriptions.includes(gameId);
+            const userId = getUserId();
+            
+            try {
+                if (isSubscribed) {
+                    // Unsubscribe
+                    const response = await fetch('/api/subscriptions/unsubscribe', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'X-User-ID': userId
+                        },
+                        body: JSON.stringify({ game_id: gameId, user_id: userId })
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        subscriptions.splice(subscriptions.indexOf(gameId), 1);
+                        saveUserSubscriptions(subscriptions);
+                        updateSubscriptionUI(gameId, false);
+                    } else {
+                        checkbox.checked = true; // Revert checkbox
+                        const data = await response.json();
+                        alert(data.error || 'Failed to unsubscribe');
+                    }
+                } else {
+                    // Subscribe
+                    const response = await fetch('/api/subscriptions/subscribe', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'X-User-ID': userId
+                        },
+                        body: JSON.stringify({ game_id: gameId, user_id: userId })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        subscriptions.push(gameId);
+                        saveUserSubscriptions(subscriptions);
+                        window.userSubscriptionTier = data.tier || window.userSubscriptionTier;
+                        updateSubscriptionUI(gameId, true);
+                    } else {
+                        checkbox.checked = false; // Revert checkbox
+                        alert(data.error || 'Failed to subscribe');
+                    }
+                }
+                
+                updateSubscriptionLimits();
+            } catch (error) {
+                console.error('Subscription error:', error);
+                checkbox.checked = isSubscribed; // Revert checkbox
+                alert('Error managing subscription. Please try again.');
+            }
+        }
+        
+        function updateSubscriptionUI(gameId, isSubscribed) {
+            const checkbox = document.getElementById(`subscribe-${gameId}`);
+            const label = document.getElementById(`subscribe-label-${gameId}`);
+            const status = document.getElementById(`subscription-status-${gameId}`);
+            
+            if (checkbox && label && status) {
+                checkbox.checked = isSubscribed;
+                label.textContent = isSubscribed ? 'Subscribed' : 'Subscribe';
+                status.textContent = isSubscribed ? '✓ Subscribed - You\'ll receive alerts for this game' : 'Not subscribed';
+                status.style.color = isSubscribed ? '#10b981' : '#666';
+            }
+        }
+        
+        function updateSubscriptionLimits() {
+            const subscriptions = getUserSubscriptions();
+            const tier = window.userSubscriptionTier || 'free';
+            const maxSubscriptions = tier === 'free' ? 1 : 999;
+            
+            // Update limit warnings
+            document.querySelectorAll('.game-subscription-checkbox').forEach(checkbox => {
+                const gameId = checkbox.getAttribute('data-game-id');
+                const limitSpan = document.getElementById(`subscription-limit-${gameId}`);
+                
+                if (limitSpan) {
+                    if (tier === 'free' && subscriptions.length >= maxSubscriptions && !subscriptions.includes(gameId)) {
+                        limitSpan.textContent = 'Free limit: 1 game. Upgrade to Premium for unlimited!';
+                        limitSpan.style.display = 'inline';
+                    } else {
+                        limitSpan.style.display = 'none';
+                    }
+                }
+            });
+        }
+        
+        async function loadUserSubscriptions() {
+            try {
+                const userId = getUserId();
+                const response = await fetch(`/api/subscriptions?user_id=${encodeURIComponent(userId)}`, {
+                    headers: { 'X-User-ID': userId }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const subscriptions = data.subscriptions || [];
+                    window.userSubscriptionTier = data.tier || 'free';
+                    saveUserSubscriptions(subscriptions);
+                    
+                    // Update UI for all games
+                    subscriptions.forEach(gameId => {
+                        updateSubscriptionUI(gameId, true);
+                    });
+                    
+                    updateSubscriptionLimits();
+                } else {
+                    // Fallback to localStorage
+                    const subscriptions = getUserSubscriptions();
+                    subscriptions.forEach(gameId => {
+                        updateSubscriptionUI(gameId, true);
+                    });
+                    updateSubscriptionLimits();
+                }
+            } catch (error) {
+                console.error('Error loading subscriptions:', error);
+                // Fallback to localStorage
+                const subscriptions = getUserSubscriptions();
+                subscriptions.forEach(gameId => {
+                    updateSubscriptionUI(gameId, true);
+                });
+                updateSubscriptionLimits();
+            }
+        }
+        
+        // Initialize subscriptions on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            loadUserSubscriptions();
+        });
+        
+        function showPremiumGate(featureName = 'This feature') {
+            // Show upgrade modal
+            const modal = document.getElementById('premiumGateModal');
+            const messageEl = document.getElementById('premiumGateMessage');
+            
+            if (messageEl) {
+                messageEl.textContent = `${featureName} is available for Premium and Pro subscribers.`;
+            }
+            
+            if (modal) {
+                modal.classList.add('active');
+            }
+        }
+        
+        function closePremiumGateModal() {
+            const modal = document.getElementById('premiumGateModal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        }
 
-        // Auto-refresh every 60 seconds (fast, from state)
-        setInterval(() => loadData(false), 60000);
+        function toggleCollapsible(sectionId) {
+            const content = document.getElementById(sectionId);
+            const icon = document.getElementById(`icon-${sectionId}`);
+            const section = content.closest('.collapsible-section');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                if (icon) icon.textContent = '▼';
+                if (section) section.classList.remove('collapsed');
+            } else {
+                content.style.display = 'none';
+                if (icon) icon.textContent = '▶';
+                if (section) section.classList.add('collapsed');
+            }
+        }
+        
+        function toggleComparison(gameId) {
+            // Check entitlements/tier - comparison is gated for free users
+            const canCompareGames = (window.entitlements && window.entitlements.can_compare_games === true)
+                || window.userSubscriptionTier === 'premium'
+                || window.userSubscriptionTier === 'pro'
+                || window.userSubscriptionTier === 'admin';
+            if (!canCompareGames) {
+                const checkbox = document.getElementById(`compare-${gameId}`);
+                if (checkbox) checkbox.checked = false;
+                showPremiumGate('Game comparison');
+                return;
+            }
+            
+            const checkbox = document.getElementById(`compare-${gameId}`);
+            const gameCard = document.getElementById(`game-card-${gameId}`);
+            
+            if (checkbox.checked) {
+                comparisonGames.add(gameId);
+                gameCard.classList.add('comparing');
+                
+                // Store game data for comparison
+                if (window.statusData && window.statusData.games[gameId]) {
+                    comparisonData[gameId] = window.statusData.games[gameId];
+                }
+            } else {
+                comparisonGames.delete(gameId);
+                gameCard.classList.remove('comparing');
+                delete comparisonData[gameId];
+            }
+            
+            updateComparisonBar();
+        }
 
-        // Close tooltips when clicking outside
+        function updateComparisonBar() {
+            const comparisonBar = document.getElementById('comparison-bar');
+            const comparisonContent = document.getElementById('comparison-content');
+            const comparisonCount = document.getElementById('comparison-count');
+            
+            if (comparisonGames.size === 0) {
+                comparisonBar.classList.remove('active');
+                document.body.classList.remove('comparison-active');
+                comparisonContent.innerHTML = `
+                    <div class="comparison-empty">
+                        Select games to compare by clicking the "Compare" checkbox on each game card
+                    </div>
+                `;
+                return;
+            }
+            
+            // Show comparison bar
+            comparisonBar.classList.add('active');
+            document.body.classList.add('comparison-active');
+            comparisonCount.textContent = comparisonGames.size;
+            
+            // Smooth scroll to comparison bar after a short delay
+            setTimeout(() => {
+                comparisonBar.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+            
+            // Sort games by EV (best to worst)
+            const gamesArray = Array.from(comparisonGames).map(gameId => ({
+                id: gameId,
+                ...comparisonData[gameId]
+            })).sort((a, b) => (b.net_ev || 0) - (a.net_ev || 0));
+            
+            // Calculate additional metrics for each game
+            const gamesWithMetrics = gamesArray.map((game, index) => {
+                // Calculate ROI: (Net EV / Ticket Cost) * 100
+                const roi = game.ticket_cost > 0 ? ((game.net_ev / game.ticket_cost) * 100) : 0;
+                
+                // Calculate cost per $1 of jackpot: (Odds * Ticket Cost) / Jackpot
+                const costPerDollar = game.current_jackpot > 0 ? (game.odds * game.ticket_cost) / game.current_jackpot : 0;
+                
+                // Calculate EV trend (change since last draw)
+                // Try to get from game data, or calculate from change_percent if available
+                let evTrend = null;
+                let netEvTrend = null;
+                
+                if (game.ev_percentage_change !== undefined && game.ev_percentage_change !== null) {
+                    evTrend = game.ev_percentage_change;
+                } else if (game.change_percent !== undefined && game.change_percent !== null) {
+                    // Approximate EV trend from jackpot change percentage
+                    // EV typically improves proportionally with jackpot increase
+                    evTrend = game.change_percent * 0.1; // Rough approximation
+                }
+                
+                if (game.net_ev_change !== undefined && game.net_ev_change !== null) {
+                    netEvTrend = game.net_ev_change;
+                } else if (game.change !== undefined && game.change !== null && game.odds > 0) {
+                    // Approximate Net EV change from jackpot change
+                    // Net EV change ≈ (jackpot change / odds) - ticket cost change (usually 0)
+                    netEvTrend = (game.change / game.odds) || 0;
+                }
+                
+                // Determine if this is the best/worst for each metric
+                const isBest = index === 0;
+                const isWorst = index === gamesArray.length - 1;
+                const bestNetEv = gamesArray[0].net_ev;
+                const worstNetEv = gamesArray[gamesArray.length - 1].net_ev;
+                
+                return {
+                    ...game,
+                    roi,
+                    costPerDollar,
+                    evTrend,
+                    netEvTrend,
+                    isBest,
+                    isWorst,
+                    bestNetEv,
+                    worstNetEv
+                };
+            });
+            
+            // Render comparison cards with header
+            comparisonContent.innerHTML = `
+                <div class="comparison-table-header" style="display: grid; grid-template-columns: repeat(${gamesArray.length}, 1fr); gap: 20px; margin-bottom: 10px; padding: 0 20px;">
+                    <div style="font-weight: bold; font-size: 0.9em; opacity: 0.9;">Metric</div>
+                    ${gamesArray.map((game, index) => `
+                        <div style="font-weight: bold; font-size: 0.9em; opacity: 0.9; text-align: center;">${game.name}</div>
+                    `).join('')}
+                </div>
+                <div class="comparison-grid">
+                    ${gamesWithMetrics.map((game, index) => `
+                        <div class="comparison-card" style="${index === 0 ? 'border: 2px solid rgba(255, 215, 0, 0.5);' : index === gamesArray.length - 1 ? 'border: 2px solid rgba(239, 68, 68, 0.3);' : ''}">
+                            <div class="comparison-card-header">
+                                <div class="comparison-card-name">${game.name}</div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div class="comparison-card-rank" style="${index === 0 ? 'background: rgba(255, 215, 0, 0.3); color: #ffd700;' : index === gamesArray.length - 1 ? 'background: rgba(239, 68, 68, 0.3); color: #fca5a5;' : ''}">
+                                        ${index === 0 ? `
+                                            <span class="info-tooltip" style="cursor: help; position: relative;">
+                                                ⭐ Best
+                                                <span class="tooltip-text" style="width: 280px; white-space: normal; line-height: 1.4;">
+                                                    <strong>Best</strong><br>
+                                                    Highest expected value per $1 spent at current jackpot.<br><br>
+                                                    Ranked by Net EV adjusted for odds and ticket cost.
+                                                </span>
+                                            </span>
+                                        ` : `#${index + 1}`}
+                                    </div>
+                                    <button onclick="removeFromComparison('${game.id}')" 
+                                            style="background: var(--color-bg-tertiary); border: 1px solid var(--color-border); color: var(--color-text-primary); width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 1em; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;"
+                                            onmouseover="this.style.background='var(--color-bg-secondary)'"
+                                            onmouseout="this.style.background='var(--color-bg-tertiary)'"
+                                            title="Remove from comparison">×</button>
+                                </div>
+                            </div>
+                            <div class="comparison-metric" style="${game.isBest ? 'background: rgba(16, 185, 129, 0.1);' : game.isWorst ? 'background: rgba(239, 68, 68, 0.1);' : ''}">
+                                <span class="comparison-metric-label">💰 Jackpot</span>
+                                <span class="comparison-metric-value" style="color: var(--color-text-primary); font-weight: ${game.isBest ? 'bold' : 'normal'};">${formatCurrency(game.current_jackpot)}</span>
+                            </div>
+                            <div class="comparison-metric" style="${game.isBest ? 'background: rgba(16, 185, 129, 0.15);' : game.isWorst ? 'background: rgba(239, 68, 68, 0.15);' : ''}">
+                                <span class="comparison-metric-label">📊 Net EV</span>
+                                <span class="comparison-metric-value" style="color: ${game.net_ev >= 0 ? 'var(--color-success)' : 'var(--color-danger)'}; font-weight: ${game.isBest ? 'bold' : 'normal'};">
+                                    ${game.net_ev >= 0 ? '+' : ''}${formatCurrency(game.net_ev)}
+                                    ${game.netEvTrend !== null ? `
+                                        <span style="font-size: 0.75em; opacity: 0.8; margin-left: 4px;">
+                                            ${game.netEvTrend >= 0 ? '⬆' : '⬇'} ${formatCurrency(Math.abs(game.netEvTrend))} since last draw
+                                        </span>
+                                    ` : ''}
+                                </span>
+                            </div>
+                            <div class="comparison-metric" style="${game.isBest ? 'background: rgba(16, 185, 129, 0.1);' : game.isWorst ? 'background: rgba(239, 68, 68, 0.1);' : ''}">
+                                <span class="comparison-metric-label">📈 EV %</span>
+                                <span class="comparison-metric-value" style="color: ${game.ev_percentage >= 0 ? 'var(--color-success)' : 'var(--color-danger)'}; font-weight: ${game.isBest ? 'bold' : 'normal'};">
+                                    ${game.ev_percentage >= 0 ? '+' : ''}${formatNumber(game.ev_percentage)}%
+                                    ${game.evTrend !== null ? `
+                                        <span style="font-size: 0.75em; opacity: 0.8; margin-left: 4px;">
+                                            ${game.evTrend >= 0 ? '⬆' : '⬇'} ${formatNumber(Math.abs(game.evTrend))}% since last draw
+                                        </span>
+                                    ` : ''}
+                                </span>
+                            </div>
+                            <div class="comparison-metric">
+                                <span class="comparison-metric-label">💵 Ticket Cost</span>
+                                <span class="comparison-metric-value" style="color: var(--color-text-primary);">${formatCurrency(game.ticket_cost)}</span>
+                            </div>
+                            <div class="comparison-metric" style="${game.isBest ? 'background: rgba(16, 185, 129, 0.1);' : game.isWorst ? 'background: rgba(239, 68, 68, 0.1);' : ''}">
+                                <span class="comparison-metric-label">📊 ROI</span>
+                                <span class="comparison-metric-value" style="color: ${game.roi >= 0 ? 'var(--color-success)' : 'var(--color-danger)'}; font-weight: ${game.isBest ? 'bold' : 'normal'};">
+                                    ${game.roi >= 0 ? '+' : ''}${formatNumber(game.roi)}%
+                                </span>
+                            </div>
+                            <div class="comparison-metric">
+                                <span class="comparison-metric-label">🎯 Odds</span>
+                                <span class="comparison-metric-value" style="color: var(--color-text-primary);">1 in ${game.odds.toLocaleString()}</span>
+                            </div>
+                            <div class="comparison-metric">
+                                <span class="comparison-metric-label">💰 Cost per $1 Jackpot</span>
+                                    <span class="comparison-metric-value" style="color: ${game.costPerDollar > 1000 ? 'var(--color-danger)' : game.costPerDollar > 100 ? 'var(--color-warning)' : 'var(--color-text-tertiary)'};">
+                                    ${game.costPerDollar > 1000 ? formatCurrency(game.costPerDollar) : formatNumber(game.costPerDollar)}
+                                </span>
+                            </div>
+                            <div class="comparison-metric">
+                                <span class="comparison-metric-label">⏰ Next Draw</span>
+                                <span class="comparison-metric-value" style="color: var(--color-text-primary);">${game.time_to_draw || 'Unknown'}</span>
+                            </div>
+                            ${game.rollover_count !== undefined && game.rollover_count !== null ? `
+                            <div class="comparison-metric">
+                                <span class="comparison-metric-label">🔄 Rollovers</span>
+                                <span class="comparison-metric-value" style="color: var(--color-text-primary);">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span>${game.rollover_count}</span>
+                                        <div style="flex: 1; background: var(--color-bg-tertiary); border-radius: 4px; height: 8px; overflow: hidden;">
+                                            <div style="background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-light) 100%); height: 100%; width: ${Math.min(100, (game.rollover_count / 100) * 100)}%;"></div>
+                                        </div>
+                                    </div>
+                                </span>
+                            </div>
+                            ` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+                ${gamesArray.length > 0 ? `
+                    <div class="comparison-recommendation">
+                        💡 ${generateComparisonRecommendation(gamesArray)}
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        function generateComparisonRecommendation(gamesArray) {
+            if (gamesArray.length === 0) return '';
+            
+            const best = gamesArray[0];
+            
+            if (best.is_positive_ev) {
+                return `${best.name} has POSITIVE EV (+${formatCurrency(best.net_ev)})! This is the best opportunity.`;
+            }
+            
+            if (gamesArray.length === 1) {
+                return `${best.name} is selected for comparison.`;
+            }
+            
+            const secondBest = gamesArray[1];
+            const evDiff = best.net_ev - secondBest.net_ev;
+            
+            if (evDiff > 0.20) {
+                return `If you only buy one ticket, buy ${best.name}. It offers ${formatCurrency(evDiff)} better EV than ${secondBest.name}.`;
+            } else if (evDiff > 0) {
+                return `${best.name} offers slightly better value than ${secondBest.name} (${formatCurrency(evDiff)} difference).`;
+            } else {
+                return `All selected games have similar EV. ${best.name} is ranked #1.`;
+            }
+        }
+
+        function removeFromComparison(gameId) {
+            comparisonGames.delete(gameId);
+            delete comparisonData[gameId];
+            
+            // Uncheck checkbox
+            const checkbox = document.getElementById(`compare-${gameId}`);
+            if (checkbox) {
+                checkbox.checked = false;
+            }
+            
+            // Remove comparing class from card
+            const gameCard = document.getElementById(`game-card-${gameId}`);
+            if (gameCard) {
+                gameCard.classList.remove('comparing');
+            }
+            
+            updateComparisonBar();
+        }
+
+        function clearComparison() {
+            comparisonGames.clear();
+            comparisonData = {};
+            
+            // Uncheck all checkboxes
+            document.querySelectorAll('.compare-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            
+            // Remove comparing class from all cards
+            document.querySelectorAll('.game-card').forEach(card => {
+                card.classList.remove('comparing');
+            });
+            
+            updateComparisonBar();
+        }
+
+        // Load data on page load immediately (fast, from state)
+        (async () => {
+            try {
+                await loadData(false);
+            } catch (error) {
+                console.error('Initial load error:', error);
+            }
+        })();
+
+        // Auto-refresh disabled for development
+        // Uncomment the line below to enable auto-refresh:
+        // setInterval(() => loadData(false), 60000);
+
+        // Position tooltips dynamically and close when clicking outside
         document.addEventListener('click', function(event) {
-            if (!event.target.closest('.info-tooltip')) {
-                document.querySelectorAll('.info-tooltip').forEach(tooltip => {
-                    tooltip.classList.remove('active');
+            const tooltip = event.target.closest('.info-tooltip');
+            if (tooltip) {
+                const tooltipText = tooltip.querySelector('.tooltip-text');
+                if (tooltipText) {
+                    // Position relative to the tooltip icon (which is relative to game-card)
+                    tooltipText.style.left = '50%';
+                    tooltipText.style.bottom = '100%';
+                    tooltipText.style.transform = 'translateX(-50%) translateY(-8px)';
+                }
+            } else {
+                document.querySelectorAll('.info-tooltip').forEach(t => {
+                    t.classList.remove('active');
                 });
             }
         });
+        
+        // Also position on hover
+        document.querySelectorAll('.info-tooltip').forEach(tooltip => {
+            tooltip.addEventListener('mouseenter', function() {
+                const tooltipText = this.querySelector('.tooltip-text');
+                if (tooltipText) {
+                    // Position relative to the tooltip icon (which is relative to game-card)
+                    tooltipText.style.left = '50%';
+                    tooltipText.style.bottom = '100%';
+                    tooltipText.style.transform = 'translateX(-50%) translateY(-8px)';
+                }
+            });
+        });
 
-        // Live reload for development - only checks when page is visible
-        // Only active when Flask is in debug mode (check for debug indicator)
+        // Threshold editing modal state
+        let currentEditingGameId = null;
+        let currentMinLimit = 0;
+        let currentMaxLimit = 0;
+
+        // Open threshold edit modal
+        window.editThreshold = function(gameId) {
+            console.log('editThreshold called with gameId:', gameId);
+            
+            // Check entitlements/tier - custom thresholds are gated for free users
+            const canEditThresholds = (window.entitlements && window.entitlements.can_edit_thresholds === true)
+                || window.userSubscriptionTier === 'premium'
+                || window.userSubscriptionTier === 'pro'
+                || window.userSubscriptionTier === 'admin';
+            if (!canEditThresholds) {
+                showPremiumGate('Custom thresholds');
+                return;
+            }
+            
+            const gameData = window.statusData?.games?.[gameId];
+            if (!gameData) {
+                alert('Game data not loaded. Please refresh the page.');
+                console.error('Game data not found for:', gameId);
+                return;
+            }
+
+            currentEditingGameId = gameId;
+
+            // Define validation rules based on game type
+            const isLDL = gameId.includes('lucky_day_lotto');
+            currentMinLimit = isLDL ? 100000 : 50000000; // LDL: 100K, Powerball/Mega: 50M
+            currentMaxLimit = isLDL ? 1000000 : 1000000000; // LDL: 1M, Powerball/Mega: 1B
+
+            const currentMin = gameData.min_threshold || 0;
+
+            // Update modal content
+            document.querySelector('.modal-header').textContent = `Edit Alert Threshold - ${gameData.name}`;
+            document.getElementById('minThreshold').value = currentMin.toLocaleString();
+            document.getElementById('currentMin').textContent = formatCurrency(currentMin);
+            document.getElementById('thresholdRange').textContent = 
+                `Range: ${formatCurrency(currentMinLimit)} - ${formatCurrency(currentMaxLimit)}`;
+            
+            // Clear errors
+            document.getElementById('minError').classList.remove('show');
+
+            // Show modal
+            document.getElementById('thresholdModal').classList.add('active');
+        };
+
+        // Close threshold modal
+        function closeThresholdModal() {
+            document.getElementById('thresholdModal').classList.remove('active');
+            currentEditingGameId = null;
+        }
+
+        // Handle form submission
+        document.getElementById('thresholdForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const minInput = document.getElementById('minThreshold').value;
+            const minError = document.getElementById('minError');
+
+            // Clear previous errors
+            minError.classList.remove('show');
+
+            // Parse value
+            const minValue = parseFloat(minInput.replace(/[^0-9.]/g, ''));
+
+            let hasError = false;
+
+            // Validate minimum threshold
+            if (isNaN(minValue)) {
+                minError.textContent = 'Please enter a valid number';
+                minError.classList.add('show');
+                hasError = true;
+            } else if (minValue < currentMinLimit || minValue > currentMaxLimit) {
+                minError.textContent = `Must be between ${formatCurrency(currentMinLimit)} and ${formatCurrency(currentMaxLimit)}`;
+                minError.classList.add('show');
+                hasError = true;
+            }
+
+            if (hasError) return;
+
+            // Update threshold via API
+            fetch(`/api/thresholds/${currentEditingGameId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    min_threshold: minValue
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.error || `HTTP error! status: ${response.status}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    alert('Error updating threshold: ' + data.error);
+                } else {
+                    closeThresholdModal();
+                    loadData(true); // Refresh to show updated values
+                }
+            })
+            .catch(error => {
+                console.error('Error updating threshold:', error);
+                alert('Error updating threshold: ' + error.message);
+            });
+        });
+
+        // Close modal when clicking overlay
+        document.getElementById('thresholdModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeThresholdModal();
+            }
+        });
+
+        document.getElementById('premiumGateModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePremiumGateModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (document.getElementById('thresholdModal').classList.contains('active')) {
+                    closeThresholdModal();
+                }
+                if (document.getElementById('premiumGateModal').classList.contains('active')) {
+                    closePremiumGateModal();
+                }
+            }
+        });
+
+        // Live reload for development - DISABLED
+        // Uncomment below to enable auto-reload on template changes:
+        /*
         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
             let lastModified = document.lastModified;
             let checkInterval = null;
@@ -1158,7 +3350,7 @@
                         .catch(() => {
                             // Silently fail if check doesn't work
                         });
-                }, 10000); // Check every 5 seconds, but only when page is visible
+                }, 10000); // Check every 10 seconds, but only when page is visible
             }
             
             function stopLiveReload() {
@@ -1182,6 +3374,7 @@
                 startLiveReload();
             }
         }
+        */
     </script>
 </body>
 </html>

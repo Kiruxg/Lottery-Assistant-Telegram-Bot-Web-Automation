@@ -103,7 +103,7 @@ class JackpotMonitor:
         """
         try:
             # Try with requests first
-            response = self.session.get(url, timeout=30, allow_redirects=True)
+            response = self.session.get(url, timeout=10, allow_redirects=True)
             response.raise_for_status()
             return BeautifulSoup(response.content, 'lxml')
         except requests.RequestException as e:
@@ -128,7 +128,7 @@ class JackpotMonitor:
             loop = asyncio.get_event_loop()
             response = await loop.run_in_executor(
                 None,
-                lambda: self.session.get(url, timeout=10, allow_redirects=True)  # Reduced timeout
+                lambda: self.session.get(url, timeout=8, allow_redirects=True)  # Reduced timeout
             )
             response.raise_for_status()
             return BeautifulSoup(response.content, 'lxml')
@@ -163,8 +163,8 @@ class JackpotMonitor:
                 )
                 page = await context.new_page()
                 # Use 'domcontentloaded' instead of 'networkidle' for faster loading
-                # Reduced timeout from 30s to 15s
-                await page.goto(url, wait_until='domcontentloaded', timeout=15000)
+                # Reduced timeout from 30s to 8s
+                await page.goto(url, wait_until='domcontentloaded', timeout=8000)
                 content = await page.content()
                 await browser.close()
                 return BeautifulSoup(content, 'lxml')
@@ -447,6 +447,22 @@ class JackpotMonitor:
                 task = self.get_mega_millions_jackpot_async(shared_soup=homepage_soup)
                 tasks.append(task)
                 game_map[task] = game
+            elif game == "lotto":
+                task = self.get_lotto_jackpot_async(shared_soup=homepage_soup)
+                tasks.append(task)
+                game_map[task] = game
+            elif game == "pick_3":
+                task = self.get_pick_3_jackpot_async(shared_soup=homepage_soup)
+                tasks.append(task)
+                game_map[task] = game
+            elif game == "pick_4":
+                task = self.get_pick_4_jackpot_async(shared_soup=homepage_soup)
+                tasks.append(task)
+                game_map[task] = game
+            elif game == "hot_wins":
+                task = self.get_hot_wins_jackpot_async(shared_soup=homepage_soup)
+                tasks.append(task)
+                game_map[task] = game
             else:
                 logger.warning(f"Unknown game: {game}")
         
@@ -456,11 +472,75 @@ class JackpotMonitor:
             completed = await asyncio.gather(*tasks, return_exceptions=True)
             for task, result in zip(tasks, completed):
                 game_id = game_map[task]
+                
+                # Debug logging for pick_4 and hot_wins
+                if game_id in ['pick_4', 'hot_wins']:
+                    logger.info(f"[{game_id.upper()}] Task completed. Result type: {type(result)}, Result: {result}")
+                
                 if isinstance(result, Exception):
-                    logger.error(f"Error fetching {game_id}: {result}")
-                    results[game_id] = None
+                    logger.error(f"[{game_id.upper()}] Error fetching {game_id}: {result}")
+                    import traceback
+                    logger.error(f"[{game_id.upper()}] Exception traceback: {traceback.format_exc()}")
+                    # Pick 4 and Hot Wins should NEVER return None - use fallback values
+                    if game_id == 'pick_4':
+                        fallback_result = {
+                            'game': 'Pick 4',
+                            'jackpot': 5000,  # Fixed prize
+                            'timestamp': datetime.now().isoformat(),
+                            'source': f"{self.base_url}/dbg/play/pick4",
+                            'note': 'Using fixed prize - exception occurred'
+                        }
+                        results[game_id] = fallback_result
+                        logger.info(f"[PICK_4] Using exception fallback: {fallback_result}")
+                    elif game_id == 'hot_wins':
+                        fallback_result = {
+                            'game': 'Hot Wins',
+                            'jackpot': 20000,  # Starting jackpot fallback
+                            'timestamp': datetime.now().isoformat(),
+                            'source': f"{self.base_url}/dbg/play/hotwins",
+                            'note': 'Using starting_jackpot fallback - exception occurred'
+                        }
+                        results[game_id] = fallback_result
+                        logger.info(f"[HOT_WINS] Using exception fallback: {fallback_result}")
+                    else:
+                        results[game_id] = None
+                elif result is None:
+                    # Handle case where method returned None (shouldn't happen for pick_4/hot_wins)
+                    logger.warning(f"[{game_id.upper()}] Method returned None (unexpected!)")
+                    if game_id == 'pick_4':
+                        logger.warning(f"[PICK_4] Pick 4 returned None, using fixed prize fallback")
+                        fallback_result = {
+                            'game': 'Pick 4',
+                            'jackpot': 5000,  # Fixed prize
+                            'timestamp': datetime.now().isoformat(),
+                            'source': f"{self.base_url}/dbg/play/pick4",
+                            'note': 'Using fixed prize - method returned None'
+                        }
+                        results[game_id] = fallback_result
+                        logger.info(f"[PICK_4] Using None fallback: {fallback_result}")
+                    elif game_id == 'hot_wins':
+                        logger.warning(f"[HOT_WINS] Hot Wins returned None, using starting_jackpot fallback")
+                        fallback_result = {
+                            'game': 'Hot Wins',
+                            'jackpot': 20000,  # Starting jackpot fallback
+                            'timestamp': datetime.now().isoformat(),
+                            'source': f"{self.base_url}/dbg/play/hotwins",
+                            'note': 'Using starting_jackpot fallback - method returned None'
+                        }
+                        results[game_id] = fallback_result
+                        logger.info(f"[HOT_WINS] Using None fallback: {fallback_result}")
+                    else:
+                        results[game_id] = None
                 else:
                     results[game_id] = result
+                    if game_id in ['pick_4', 'hot_wins']:
+                        logger.info(f"[{game_id.upper()}] Successfully stored result: {result}")
+        
+        # Final debug logging
+        if 'pick_4' in results:
+            logger.info(f"[PICK_4] Final result in get_all_jackpots_async: {results.get('pick_4')}")
+        if 'hot_wins' in results:
+            logger.info(f"[HOT_WINS] Final result in get_all_jackpots_async: {results.get('hot_wins')}")
         
         return results
     
@@ -628,10 +708,295 @@ class JackpotMonitor:
             logger.debug(traceback.format_exc())
             return None
     
+    async def get_lotto_jackpot_async(self, shared_soup: Optional[BeautifulSoup] = None) -> Optional[Dict]:
+        """Get Illinois Lotto jackpot (async version)"""
+        try:
+            if shared_soup:
+                soup = shared_soup
+                url_used = f"{self.base_url}/"
+            else:
+                urls_to_try = [
+                    f"{self.base_url}/dbg/play/lotto",
+                    f"{self.base_url}/",
+                ]
+                
+                soup = None
+                url_used = None
+                
+                for url in urls_to_try:
+                    skip_playwright = url == f"{self.base_url}/"
+                    soup = await self._fetch_page_async(url, skip_playwright=skip_playwright)
+                    if soup and soup.title and "not found" not in soup.title.string.lower():
+                        url_used = url
+                        logger.debug(f"Successfully fetched Lotto from: {url}")
+                        break
+            
+            if not soup:
+                logger.warning("Could not fetch page for Lotto")
+                return None
+            
+            jackpot_value = None
+            
+            # Look for Lotto game card
+            lotto_card = soup.find('div', class_=re.compile(r'mega-menu_game-card--lotto|lotto.*card', re.I))
+            if lotto_card:
+                logger.debug("Found Lotto card")
+                jackpot_container = lotto_card.find('div', class_=re.compile(r'jackpot', re.I))
+                if jackpot_container:
+                    jackpot_text = jackpot_container.get_text()
+                    value = self._parse_currency(jackpot_text)
+                    if value and 1000000 <= value <= 50000000:  # Lotto range $1M-$50M (starts at $2M)
+                        jackpot_value = value
+                        logger.debug(f"Found Lotto jackpot in card container: {value}")
+                else:
+                    card_text = lotto_card.get_text()
+                    all_values = re.findall(r'\$[\d,KM]+', card_text)
+                    for val_str in all_values:
+                        value = self._parse_currency(val_str)
+                        if value and 500000 <= value <= 10000000:
+                            if jackpot_value is None or value > jackpot_value:
+                                jackpot_value = value
+                                logger.debug(f"Found Lotto jackpot in card text: {value}")
+            
+            # Fallback: search all currency strings in Lotto range (expanded range)
+            if not jackpot_value:
+                all_currency_strings = soup.find_all(string=re.compile(r'\$[\d,KM]+'))
+                for currency_str in all_currency_strings:
+                    value = self._parse_currency(currency_str)
+                    # Lotto jackpot range: $1M-$50M (starts at $2M minimum)
+                    if value and 1000000 <= value <= 50000000:
+                        if jackpot_value is None or value > jackpot_value:
+                            jackpot_value = value
+                            logger.debug(f"Found Lotto jackpot via currency search: {value}")
+            
+            # Additional fallback: look for "Lotto" text near currency values
+            if not jackpot_value:
+                lotto_elements = soup.find_all(string=re.compile(r'lotto', re.I))
+                for lotto_elem in lotto_elements:
+                    parent = lotto_elem.find_parent()
+                    if parent:
+                        parent_text = parent.get_text()
+                        all_values = re.findall(r'\$[\d,KM]+', parent_text)
+                        for val_str in all_values:
+                            value = self._parse_currency(val_str)
+                            if value and 1000000 <= value <= 50000000:
+                                if jackpot_value is None or value > jackpot_value:
+                                    jackpot_value = value
+                                    logger.debug(f"Found Lotto jackpot near 'Lotto' text: {value}")
+            
+            if jackpot_value:
+                return {
+                    'game': 'Lotto',
+                    'jackpot': jackpot_value,
+                    'timestamp': datetime.now().isoformat(),
+                    'source': url_used or f"{self.base_url}/dbg/play/lotto"
+                }
+            
+            logger.warning("Could not find Lotto jackpot")
+            return None
+            
+        except Exception as e:
+            logger.error(f"Error fetching Lotto jackpot: {e}")
+            import traceback
+            logger.debug(traceback.format_exc())
+            return None
+    
+    async def get_pick_3_jackpot_async(self, shared_soup: Optional[BeautifulSoup] = None) -> Optional[Dict]:
+        """Get Pick 3 jackpot (async version) - returns fixed prize amount"""
+        # Pick 3 has fixed prizes, not progressive jackpots
+        # Maximum prize: $500 for $1.00 straight play (odds 1:1,000)
+        return {
+            'game': 'Pick 3',
+            'jackpot': 500,  # Maximum prize for straight play
+            'timestamp': datetime.now().isoformat(),
+            'source': f"{self.base_url}/dbg/play/pick3",
+            'note': 'Fixed prize game - maximum win $500 (straight play)'
+        }
+    
+    async def get_pick_4_jackpot_async(self, shared_soup: Optional[BeautifulSoup] = None) -> Dict:
+        """Get Pick 4 jackpot (async version) - returns fixed prize amount
+        
+        Always returns a value - never None. Pick 4 has fixed prizes.
+        """
+        try:
+            # Pick 4 has fixed prizes, not progressive jackpots
+            # Maximum prize: $5,000 for $1.00 straight play (odds 1:10,000)
+            # This method ALWAYS returns a value - never None
+            result = {
+                'game': 'Pick 4',
+                'jackpot': 5000,  # Maximum prize for straight play
+                'timestamp': datetime.now().isoformat(),
+                'source': f"{self.base_url}/dbg/play/pick4",
+                'note': 'Fixed prize game - maximum win $5,000 (straight play)'
+            }
+            logger.info(f"[PICK_4] Returning jackpot data: {result}")
+            return result
+        except Exception as e:
+            logger.error(f"[PICK_4] Exception in get_pick_4_jackpot_async: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+            # Still return a value even on exception
+            result = {
+                'game': 'Pick 4',
+                'jackpot': 5000,
+                'timestamp': datetime.now().isoformat(),
+                'source': f"{self.base_url}/dbg/play/pick4",
+                'note': 'Fixed prize game - exception occurred but returning fallback'
+            }
+            logger.info(f"[PICK_4] Returning fallback after exception: {result}")
+            return result
+    
+    async def get_hot_wins_jackpot_async(self, shared_soup: Optional[BeautifulSoup] = None) -> Dict:
+        """Get Hot Wins jackpot (async version)
+        
+        Always returns a value - never None. Uses starting_jackpot (20000) as fallback if scraping fails.
+        """
+        try:
+            if shared_soup:
+                soup = shared_soup
+                url_used = f"{self.base_url}/"
+            else:
+                urls_to_try = [
+                    f"{self.base_url}/games/hot-wins",
+                    f"{self.base_url}/games/hotwins",
+                    f"{self.base_url}/dbg/play/hotwins",
+                    f"{self.base_url}/dbg/play/hot-wins",
+                    f"{self.base_url}/",
+                ]
+                
+                soup = None
+                url_used = None
+                
+                for url in urls_to_try:
+                    skip_playwright = url == f"{self.base_url}/"
+                    soup = await self._fetch_page_async(url, skip_playwright=skip_playwright)
+                    if soup and soup.title and "not found" not in soup.title.string.lower():
+                        url_used = url
+                        logger.debug(f"Successfully fetched Hot Wins from: {url}")
+                        break
+            
+            if not soup:
+                # If page fetch failed, use starting_jackpot as fallback (never return None)
+                logger.warning("[HOT_WINS] Could not fetch page for Hot Wins, using starting_jackpot fallback: $20,000")
+                result = {
+                    'game': 'Hot Wins',
+                    'jackpot': 20000,  # Starting jackpot from config as fallback
+                    'timestamp': datetime.now().isoformat(),
+                    'source': f"{self.base_url}/dbg/play/hotwins",
+                    'note': 'Using starting_jackpot fallback - page fetch failed'
+                }
+                logger.info(f"[HOT_WINS] Returning fallback after page fetch failure: {result}")
+                return result
+            
+            jackpot_value = None
+            
+            # Look for Hot Wins game card
+            hot_wins_card = soup.find('div', class_=re.compile(r'mega-menu_game-card--hotwins|hot.*wins.*card', re.I))
+            if hot_wins_card:
+                logger.debug("Found Hot Wins card")
+                jackpot_container = hot_wins_card.find('div', class_=re.compile(r'jackpot', re.I))
+                if jackpot_container:
+                    jackpot_text = jackpot_container.get_text()
+                    value = self._parse_currency(jackpot_text)
+                    if value and 10000 <= value <= 2000000:  # Hot Wins range $10K-$2M (expanded)
+                        jackpot_value = value
+                        logger.debug(f"Found Hot Wins jackpot in card container: {value}")
+                else:
+                    card_text = hot_wins_card.get_text()
+                    all_values = re.findall(r'\$[\d,KM]+', card_text)
+                    for val_str in all_values:
+                        value = self._parse_currency(val_str)
+                        if value and 20000 <= value <= 1000000:
+                            if jackpot_value is None or value > jackpot_value:
+                                jackpot_value = value
+                                logger.debug(f"Found Hot Wins jackpot in card text: {value}")
+            
+            # Fallback: search all currency strings in Hot Wins range (expanded)
+            if not jackpot_value:
+                all_currency_strings = soup.find_all(string=re.compile(r'\$[\d,KM]+'))
+                for currency_str in all_currency_strings:
+                    value = self._parse_currency(currency_str)
+                    # Expanded range: $10K-$2M to catch various Hot Wins jackpot levels
+                    if value and 10000 <= value <= 2000000:
+                        if jackpot_value is None or value > jackpot_value:
+                            jackpot_value = value
+                            logger.debug(f"Found Hot Wins jackpot via currency search: {value}")
+            
+            # Additional fallback: search for "Hot Wins" text and nearby jackpot values
+            if not jackpot_value:
+                hot_wins_elements = soup.find_all(string=re.compile(r'hot.*wins', re.I))
+                for element in hot_wins_elements:
+                    parent = element.parent
+                    if parent:
+                        # Search in parent and siblings for currency values
+                        for sibling in [parent] + list(parent.find_next_siblings())[:5]:
+                            text = sibling.get_text() if hasattr(sibling, 'get_text') else str(sibling)
+                            currency_matches = re.findall(r'\$[\d,KM]+', text)
+                            for val_str in currency_matches:
+                                value = self._parse_currency(val_str)
+                                if value and 10000 <= value <= 2000000:
+                                    if jackpot_value is None or value > jackpot_value:
+                                        jackpot_value = value
+                                        logger.debug(f"Found Hot Wins jackpot near text: {value}")
+            
+            # Additional fallback: look for "Hot Wins" text near currency values
+            if not jackpot_value:
+                hot_wins_elements = soup.find_all(string=re.compile(r'hot.*wins', re.I))
+                for hot_wins_elem in hot_wins_elements:
+                    parent = hot_wins_elem.find_parent()
+                    if parent:
+                        parent_text = parent.get_text()
+                        all_values = re.findall(r'\$[\d,KM]+', parent_text)
+                        for val_str in all_values:
+                            value = self._parse_currency(val_str)
+                            if value and 10000 <= value <= 2000000:
+                                if jackpot_value is None or value > jackpot_value:
+                                    jackpot_value = value
+                                    logger.debug(f"Found Hot Wins jackpot near 'Hot Wins' text: {value}")
+            
+            if jackpot_value:
+                result = {
+                    'game': 'Hot Wins',
+                    'jackpot': jackpot_value,
+                    'timestamp': datetime.now().isoformat(),
+                    'source': url_used or f"{self.base_url}/dbg/play/hotwins"
+                }
+                logger.info(f"[HOT_WINS] Returning scraped jackpot data: {result}")
+                return result
+            
+            # If scraping failed, use starting_jackpot as fallback (never return None)
+            # Starting jackpot from config: 20000
+            logger.warning("[HOT_WINS] Could not find Hot Wins jackpot via scraping, using starting_jackpot fallback: $20,000")
+            result = {
+                'game': 'Hot Wins',
+                'jackpot': 20000,  # Starting jackpot from config as fallback
+                'timestamp': datetime.now().isoformat(),
+                'source': url_used or f"{self.base_url}/dbg/play/hotwins",
+                'note': 'Using starting_jackpot fallback - scraping failed'
+            }
+            logger.info(f"[HOT_WINS] Returning fallback jackpot data: {result}")
+            return result
+            
+        except Exception as e:
+            logger.error(f"[HOT_WINS] Error fetching Hot Wins jackpot: {e}")
+            import traceback
+            logger.error(f"[HOT_WINS] Exception traceback: {traceback.format_exc()}")
+            # Always return a value - use starting_jackpot as fallback
+            logger.warning("[HOT_WINS] Exception during Hot Wins fetch, using starting_jackpot fallback: $20,000")
+            result = {
+                'game': 'Hot Wins',
+                'jackpot': 20000,  # Starting jackpot from config as fallback
+                'timestamp': datetime.now().isoformat(),
+                'source': f"{self.base_url}/dbg/play/hotwins",
+                'note': 'Using starting_jackpot fallback - exception occurred'
+            }
+            logger.info(f"[HOT_WINS] Returning fallback after exception: {result}")
+            return result
+    
     def test_connection(self) -> bool:
         """Test connection to lottery website"""
         try:
-            response = self.session.get(self.base_url, timeout=10)
+            response = self.session.get(self.base_url, timeout=8)
             return response.status_code == 200
         except Exception as e:
             logger.error(f"Connection test failed: {e}")

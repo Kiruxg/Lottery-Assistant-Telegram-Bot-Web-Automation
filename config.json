@@ -5,12 +5,12 @@
       "name": "Lucky Day Lotto Midday",
       "draw_time": "12:40",
       "ticket_cost": 1.0,
-      "odds": 575757,
-      "secondary_prize_ev": 0.10,
+      "odds": 1221759,
+      "secondary_prize_ev": 0.1,
       "min_threshold": 500000,
       "step_increment": 50000,
       "threshold_operator": ">=",
-      "starting_jackpot": 50000,
+      "starting_jackpot": 100000,
       "rollover_increment": 50000
     },
     "lucky_day_lotto_evening": {
@@ -18,12 +18,12 @@
       "name": "Lucky Day Lotto Evening",
       "draw_time": "21:22",
       "ticket_cost": 1.0,
-      "odds": 575757,
-      "secondary_prize_ev": 0.10,
+      "odds": 1221759,
+      "secondary_prize_ev": 0.1,
       "min_threshold": 500000,
       "step_increment": 50000,
       "threshold_operator": ">=",
-      "starting_jackpot": 50000,
+      "starting_jackpot": 100000,
       "rollover_increment": 50000
     },
     "powerball": {
@@ -46,11 +46,63 @@
       "ticket_cost": 5.0,
       "odds": 302575350,
       "secondary_prize_ev": 0.15,
-      "min_threshold": 100000000,
+      "min_threshold": 300000000.0,
       "step_increment": 10000000,
       "threshold_operator": ">",
-      "starting_jackpot": 20000000,
+      "starting_jackpot": 50000000,
       "rollover_increment": 2000000
+    },
+    "lotto": {
+      "enabled": true,
+      "name": "Lotto",
+      "draw_time": "21:22",
+      "ticket_cost": 2.0,
+      "odds": 15890700,
+      "secondary_prize_ev": 0.15,
+      "min_threshold": 2000000,
+      "step_increment": 200000,
+      "threshold_operator": ">=",
+      "starting_jackpot": 2000000,
+      "rollover_increment": 200000
+    },
+    "pick_3": {
+      "enabled": true,
+      "name": "Pick 3",
+      "draw_time": "12:40,21:22",
+      "ticket_cost": 0.5,
+      "odds": 1000,
+      "secondary_prize_ev": 0.0,
+      "min_threshold": null,
+      "step_increment": null,
+      "threshold_operator": ">=",
+      "starting_jackpot": 500,
+      "rollover_increment": 0
+    },
+    "pick_4": {
+      "enabled": true,
+      "name": "Pick 4",
+      "draw_time": "12:40,21:22",
+      "ticket_cost": 1.0,
+      "odds": 10000,
+      "secondary_prize_ev": 0.0,
+      "min_threshold": null,
+      "step_increment": null,
+      "threshold_operator": ">=",
+      "starting_jackpot": 5000,
+      "rollover_increment": 0
+    },
+    "hot_wins": {
+      "enabled": true,
+      "name": "Hot Wins",
+      "draw_time": "00:00",
+      "ticket_cost": 2.0,
+      "odds": 1000000,
+      "secondary_prize_ev": 0.1,
+      "min_threshold": null,
+      "step_increment": null,
+      "threshold_operator": ">=",
+      "starting_jackpot": 20000,
+      "rollover_increment": 10000
     }
   },
   "alert_settings": {
@@ -79,13 +131,25 @@
       "lucky_day_lotto_midday": 500000,
       "lucky_day_lotto_evening": 500000,
       "powerball": 100000000,
-      "mega_millions": 100000000
+      "mega_millions": 100000000,
+      "lotto": 2000000,
+      "pick_3": null,
+      "pick_4": null,
+      "hot_wins": null
     },
     "rollover_threshold": {
+      "lucky_day_lotto_midday": 5,
+      "lucky_day_lotto_evening": 5,
       "powerball": 10,
-      "mega_millions": 10
+      "mega_millions": 10,
+      "lotto": 8,
+      "pick_3": null,
+      "pick_4": null,
+      "hot_wins": null
     },
-    "ev_threshold": -0.20,
-    "draw_window_hours": 24
+    "ev_threshold": -0.2,
+    "draw_window_hours": 24,
+    "ev_suppression_threshold": -0.5,
+    "ev_acceptable_threshold": -0.3
   }
 }

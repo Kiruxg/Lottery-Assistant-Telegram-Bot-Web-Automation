@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LottoEdge - Smart Lottery Analysis & Alerts</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: #2c3e50;
+        }
+
+        /* Navigation */
+        nav {
+            background: #f3f0ff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            line-height: 1;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            margin: 0;
+        }
+
+        .nav-links a {
+            color: #2c3e50;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+        }
+
+        .nav-btn {
+            background: #667eea;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s ease;
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-btn:hover {
+            background: #5568d3;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 80px 20px;
+            text-align: center;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 3.5em;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .hero p {
+            font-size: 1.3em;
+            margin-bottom: 1rem;
+            opacity: 0.95;
+        }
+
+        .hero-subtitle {
+            font-size: 1em;
+            margin-bottom: 2rem;
+            opacity: 0.85;
+            font-weight: 400;
+        }
+
+        .social-proof {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+            font-size: 0.95em;
+            opacity: 0.9;
+        }
+
+        .social-proof-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255,255,255,0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 80px 20px;
+            background: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 3rem;
+            color: #2c3e50;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5em;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .feature-card .legal-note {
+            font-size: 0.85em;
+            color: #999;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #eee;
+            font-style: italic;
+        }
+
+        /* Dashboard Preview */
+        .dashboard-preview {
+            padding: 80px 20px;
+            background: #f8f9fa;
+        }
+
+        .dashboard-preview-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .dashboard-mockup {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-top: 2rem;
+            overflow: hidden;
+        }
+
+        .dashboard-mockup img {
+            width: 100%;
+            max-width: 1000px;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        .dashboard-placeholder {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            padding: 3rem;
+            color: white;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .dashboard-placeholder-icon {
+            font-size: 4em;
+        }
+
+        .dashboard-placeholder-text {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+
+        .dashboard-placeholder-features {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .dashboard-placeholder-feature {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+
+        /* How It Works */
+        .how-it-works {
+            padding: 80px 20px;
+            background: white;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .step {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 0 auto 1rem;
+        }
+
+        .step h3 {
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+
+        .step p {
+            color: #666;
+        }
+
+        /* CTA Section */
+        .cta {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 80px 20px;
+            text-align: center;
+        }
+
+        .cta h2 {
+            font-size: 2.5em;
+            margin-bottom: 1rem;
+        }
+
+        .cta p {
+            font-size: 1.2em;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+        }
+
+        /* Footer */
+        footer {
+            background: #2c3e50;
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        footer p {
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+
+        .footer-email {
+            margin-top: 1rem;
+            opacity: 0.9;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            nav {
+                padding: 0.75rem 1rem;
+            }
+
+            .logo {
+                font-size: 1.2em;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .nav-links a {
+                font-size: 0.9em;
+            }
+
+            .nav-btn {
+                padding: 0.4rem 1rem;
+                font-size: 0.85em;
+            }
+
+            .hero h1 {
+                font-size: 2.5em;
+            }
+
+            .hero p {
+                font-size: 1.1em;
+            }
+
+            .hero-subtitle {
+                font-size: 0.9em;
+            }
+
+            .social-proof {
+                flex-direction: column;
+                gap: 1rem;
+                font-size: 0.85em;
+            }
+
+            .section-title {
+                font-size: 2em;
+            }
+
+            .dashboard-placeholder {
+                padding: 2rem 1rem;
+                min-height: 300px;
+            }
+
+            .dashboard-placeholder-features {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            nav {
+                padding: 0.5rem 0.75rem;
+            }
+
+            .logo {
+                font-size: 1em;
+            }
+
+            .nav-links {
+                gap: 0.75rem;
+            }
+
+            .nav-links a {
+                font-size: 0.8em;
+            }
+
+            .nav-btn {
+                padding: 0.35rem 0.75rem;
+                font-size: 0.75em;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include 'nav.html' %}
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Make Smarter Lottery Decisions</h1>
+            <p>Real-time jackpot monitoring, expected value calculations, and intelligent buy signals. Know when a ticket is actually worth buying.</p>
+            <p class="hero-subtitle">Currently for Illinois (Powerball, Mega Millions, Lucky Day Lotto) • More states coming soon</p>
+            <div class="hero-buttons">
+                <a href="/dashboard" class="btn btn-primary">View Dashboard</a>
+                <a href="/pricing" class="btn btn-secondary">See Pricing</a>
+            </div>
+            <div class="social-proof">
+                <div class="social-proof-item">
+                    <span>✓</span>
+                    <span>Used by data-driven players</span>
+                </div>
+                <div class="social-proof-item">
+                    <span>✓</span>
+                    <span>Backed by real expected value math</span>
+                </div>
+                <div class="social-proof-item">
+                    <span>✓</span>
+                    <span>Improving lottery decisions since 2026</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">Why LottoEdge?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Expected Value Analysis</h3>
+                    <p>Calculate the true expected value of lottery tickets, accounting for taxes, lump sum vs annuity, and secondary prizes. Know if a ticket is mathematically worth buying.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔔</div>
+                    <h3>Smart Alerts</h3>
+                    <p>Get notified when jackpots hit your custom thresholds. Set minimum thresholds and step increments for each game. Never miss a good opportunity.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Buy Signal Intelligence</h3>
+                    <p>Our algorithm analyzes jackpot size, rollover count, expected value, and draw timing to recommend when to buy. High, medium, or low confidence signals.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Telegram Integration</h3>
+                    <p>Get alerts and check status directly in Telegram. Interactive bot with commands for status, thresholds, history, and buy signals.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🖥️</div>
+                    <h3>Beautiful Dashboard</h3>
+                    <p>Visual dashboard showing all games, EV calculations, threshold progress, and recommendations. Real-time updates and historical tracking.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Purchase Automation</h3>
+                    <p>Optional browser automation that opens the lottery website, selects Quick Pick, and stops at checkout. Legal compliance - you complete the purchase.</p>
+                    <p class="legal-note">LottoEdge never places bets or purchases tickets on your behalf.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard Preview -->
+    <section class="dashboard-preview">
+        <div class="dashboard-preview-content">
+            <h2 class="section-title">See It In Action</h2>
+            <p style="font-size: 1.1em; color: #666; margin-bottom: 2rem;">Get real-time insights, visual charts, and smart alerts all in one place</p>
+            <div class="dashboard-mockup">
+                <div class="dashboard-placeholder">
+                    <div class="dashboard-placeholder-icon">📊</div>
+                    <div class="dashboard-placeholder-text">Interactive Dashboard Preview</div>
+                    <div class="dashboard-placeholder-features">
+                        <div class="dashboard-placeholder-feature">
+                            <span>📈</span>
+                            <span>Jackpot Curves</span>
+                        </div>
+                        <div class="dashboard-placeholder-feature">
+                            <span>📬</span>
+                            <span>Telegram Alerts</span>
+                        </div>
+                        <div class="dashboard-placeholder-feature">
+                            <span>🎯</span>
+                            <span>Buy Signals</span>
+                        </div>
+                        <div class="dashboard-placeholder-feature">
+                            <span>💰</span>
+                            <span>EV Calculations</span>
+                        </div>
+                    </div>
+                    <a href="/dashboard" class="btn btn-primary" style="margin-top: 1.5rem;">View Live Dashboard →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works">
+        <div class="container">
+            <h2 class="section-title">How It Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Monitor</h3>
+                    <p>We continuously monitor Illinois Lottery jackpots for Lucky Day Lotto, Powerball, and Mega Millions.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Calculate</h3>
+                    <p>Our algorithm calculates expected value, accounting for taxes, odds, and secondary prizes.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Alert</h3>
+                    <p>Get notified via Telegram when thresholds are hit or buy signals are triggered.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Decide</h3>
+                    <p>Use our recommendations and data to make informed decisions about when to buy tickets.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <h2>Ready to Start?</h2>
+            <p>Join thousands of smart lottery players making data-driven decisions.</p>
+            <div class="hero-buttons">
+                <a href="/dashboard" class="btn btn-primary">Try Free Dashboard</a>
+                <a href="/pricing" class="btn btn-secondary">View Plans</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2026 LottoEdge</p>
+            <p>For informational purposes only. Always gamble responsibly.</p>
+            <p>Not affiliated with any state lottery commission.</p>
+            <div class="footer-links">
+                <a href="mailto:support@lottoedge.com">Contact</a>
+                <a href="/terms">Terms</a>
+                <a href="/privacy">Privacy</a>
+                <a href="/refunds">Refunds</a>
+            </div>
+            <p class="footer-email">Email: <a href="mailto:support@lottoedge.com" style="color: white; text-decoration: underline;">support@lottoedge.com</a></p>
+        </div>
+    </footer>
+</body>
+</html>

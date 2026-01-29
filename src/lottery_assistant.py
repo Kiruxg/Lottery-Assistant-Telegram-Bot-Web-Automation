@@ -16,6 +16,7 @@ from .threshold_alert import ThresholdAlert
 from .ev_calculator import EVCalculator
 from .purchase_automation import PurchaseAutomation
 from .buy_signal import BuySignal
+from .subscription_manager import SubscriptionManager
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +44,7 @@ class LotteryAssistant:
         )
         self.ev_calculator = EVCalculator(self.config)
         self.buy_signal = BuySignal(self.config)
+        self.subscription_manager = SubscriptionManager()
         
         # Initialize automation only if enabled
         self.automation = None
@@ -214,13 +216,14 @@ class LotteryAssistant:
         
         return min(time_diff, time_diff_yesterday) <= window_minutes
     
-    async def check_jackpots(self, game_id_filter: Optional[str] = None, only_near_draw: bool = False) -> Dict:
+    async def check_jackpots(self, game_id_filter: Optional[str] = None, only_near_draw: bool = False, suppress_messages: bool = False) -> Dict:
         """
         Check enabled games for jackpot updates
         
         Args:
             game_id_filter: If provided, only check this specific game
             only_near_draw: If True, only send alerts/status messages if near draw time
+            suppress_messages: If True, don't send automatic status/buy signal messages (for use by /status command)
             
         Returns:
             Dict with jackpot data for all games
@@ -240,12 +243,16 @@ class LotteryAssistant:
         
         results = {}
         
-        # Process games in order: LDL midday, LDL evening, Powerball, Mega Millions
+        # Process games in order: LDL midday, LDL evening, Lotto, Powerball, Mega Millions, Pick 3, Pick 4, Hot Wins
         game_order = [
             'lucky_day_lotto_midday',
             'lucky_day_lotto_evening',
+            'lotto',
             'powerball',
-            'mega_millions'
+            'mega_millions',
+            'pick_3',
+            'pick_4',
+            'hot_wins'
         ]
         
         for game_id in game_order:
@@ -253,11 +260,84 @@ class LotteryAssistant:
                 continue
                 
             jackpot_data = jackpots.get(game_id)
-            if jackpot_data:
-                game_config = self.config.get('lottery_games', {}).get(game_id, {})
-                game_name = game_config.get('name', game_id)
+            game_config = self.config.get('lottery_games', {}).get(game_id, {})
+            game_name = game_config.get('name', game_id)
+            
+            # Debug logging for pick_4 and hot_wins
+            if game_id in ['pick_4', 'hot_wins']:
+                logger.info(f"[{game_id.upper()}] Processing jackpot data: {jackpot_data}")
+                logger.info(f"[{game_id.upper()}] Type of jackpot_data: {type(jackpot_data)}")
+                if jackpot_data:
+                    logger.info(f"[{game_id.upper()}] jackpot_data.get('jackpot'): {jackpot_data.get('jackpot')}")
+                else:
+                    logger.warning(f"[{game_id.upper()}] jackpot_data is None or falsy!")
+            
+            # Handle case where jackpot_data is None (parsing failed or game not found)
+            # NOTE: pick_4 and hot_wins should NEVER reach here - their monitor methods always return values
+            if jackpot_data is None:
+                logger.warning(f"Could not fetch jackpot data for {game_id} ({game_name}) - jackpot monitor returned None. This may indicate a parsing issue or the game page structure has changed.")
+                # For fixed-prize games (Pick 3, Pick 4), we should still have a value
+                # For progressive games, use last known or starting_jackpot from config
+                game_state = self.threshold_alert._get_game_state(game_id)
+                last_known_jackpot = game_state.get('last_jackpot', 0)
+                starting_jackpot = game_config.get('starting_jackpot', 0)
                 
+                # Special handling for fixed-prize games that should always have values
+                if game_id == 'pick_3':
+                    current_jackpot = 500  # Fixed prize
+                    logger.info(f"Using fixed prize for Pick 3: ${current_jackpot}")
+                elif game_id == 'pick_4':
+                    current_jackpot = 5000  # Fixed prize
+                    logger.info(f"Using fixed prize for Pick 4: ${current_jackpot}")
+                elif game_id == 'hot_wins':
+                    # Use starting_jackpot as fallback for Hot Wins if scraping fails
+                    current_jackpot = starting_jackpot if starting_jackpot > 0 else (last_known_jackpot if last_known_jackpot > 0 else 20000)
+                    logger.info(f"Using fallback jackpot for Hot Wins: ${current_jackpot} (starting_jackpot: {starting_jackpot}, last_known: {last_known_jackpot})")
+                else:
+                    # For progressive games, keep last known value (don't overwrite with 0)
+                    current_jackpot = last_known_jackpot if last_known_jackpot > 0 else (starting_jackpot if starting_jackpot > 0 else 0)
+                    if current_jackpot == 0:
+                        logger.warning(f"No jackpot data available for {game_id} and no previous value in state")
+                
+                # Update state using check_threshold (which handles state updates properly)
+                game_min_threshold = game_config.get('min_threshold')
+                threshold_operator = game_config.get('threshold_operator', '>=')
+                self.threshold_alert.check_threshold(
+                    game_id,
+                    current_jackpot,
+                    min_threshold=game_min_threshold,
+                    threshold_operator=threshold_operator
+                )
+                
+                # Return result
+                results[game_id] = {
+                    'game': game_name,
+                    'jackpot': current_jackpot,
+                    'error': 'Could not fetch jackpot data - using fixed value or last known' if current_jackpot > 0 else 'Could not fetch jackpot data',
+                    'timestamp': datetime.now().isoformat()
+                }
+                continue
+            
+            # Process successfully fetched jackpot data
+            if jackpot_data:
                 current_jackpot = jackpot_data.get('jackpot', 0)
+                
+                # Debug logging for pick_4 and hot_wins
+                if game_id in ['pick_4', 'hot_wins']:
+                    logger.info(f"[{game_id.upper()}] Extracted current_jackpot: {current_jackpot} from jackpot_data")
+                
+                # Special handling for fixed-prize games: ensure they always have correct values
+                # This handles cases where jackpot_data exists but jackpot might be 0 or missing
+                if game_id == 'pick_3' and current_jackpot == 0:
+                    current_jackpot = 500
+                    logger.info(f"[PICK_3] Pick 3 jackpot was 0, using fixed prize: ${current_jackpot}")
+                elif game_id == 'pick_4' and current_jackpot == 0:
+                    current_jackpot = 5000
+                    logger.warning(f"[PICK_4] Pick 4 jackpot was 0, using fixed prize: ${current_jackpot}")
+                elif game_id == 'hot_wins' and current_jackpot == 0:
+                    starting_jackpot = game_config.get('starting_jackpot', 20000)
+                    current_jackpot = starting_jackpot
+                    logger.warning(f"[HOT_WINS] Hot Wins jackpot was 0, using starting_jackpot: ${current_jackpot}")
                 
                 # Calculate EV first (needed for status message)
                 odds = game_config.get('odds', 1)
@@ -309,68 +389,84 @@ class LotteryAssistant:
                 is_buy_signal_legacy = self.ev_calculator.should_buy(ev_result, ev_threshold)
                 
                 # Check if we should send messages (only near draw time if only_near_draw is True)
-                should_send = not only_near_draw or self._is_near_draw_time(game_id, window_minutes=60)
+                # Skip if suppress_messages is True (for /status command)
+                should_send = (not suppress_messages) and (not only_near_draw or self._is_near_draw_time(game_id, window_minutes=60))
                 
                 if should_send:
-                    # Build status message with buy signal info
-                    status_message = f"🎰 *{game_name}*\n\n"
-                    status_message += f"💰 Current Jackpot: ${current_jackpot:,.2f}\n"
+                    # Only send to users subscribed to this game
+                    subscribers = self.subscription_manager.get_all_subscribers(game_id)
                     
-                    # Add EV and buy signal info
-                    net_ev = ev_result.get('net_ev', 0)
-                    ev_percentage = ev_result.get('ev_percentage', 0)
-                    
-                    # Use new buy signal if available, otherwise fall back to legacy
-                    if buy_signal.get('has_signal'):
-                        status_message += f"{buy_signal['message']}\n"
-                        status_message += f"Net EV: ${net_ev:.2f} ({ev_percentage:.2f}%)\n"
-                    elif ev_result.get('is_positive_ev', False):
-                        status_message += f"✅ *BUY SIGNAL* - Positive EV: ${net_ev:.2f} ({ev_percentage:.2f}%)\n"
-                    elif is_buy_signal_legacy:
-                        status_message += f"⚠️ *BUY SIGNAL* - Near Break-Even: ${net_ev:.2f} ({ev_percentage:.2f}%)\n"
+                    if subscribers:
+                        # Build status message with buy signal info
+                        status_message = f"🎰 *{game_name}*\n\n"
+                        status_message += f"💰 Current Jackpot: ${current_jackpot:,.2f}\n"
+                        
+                        # Add EV and buy signal info
+                        net_ev = ev_result.get('net_ev', 0)
+                        ev_percentage = ev_result.get('ev_percentage', 0)
+                        
+                        # Use new buy signal if available, otherwise fall back to legacy
+                        if buy_signal.get('has_signal'):
+                            status_message += f"{buy_signal['message']}\n"
+                            status_message += f"Net EV: ${net_ev:.2f} ({ev_percentage:.2f}%)\n"
+                        elif ev_result.get('is_positive_ev', False):
+                            status_message += f"✅ *BUY SIGNAL* - Positive EV: ${net_ev:.2f} ({ev_percentage:.2f}%)\n"
+                        elif is_buy_signal_legacy:
+                            status_message += f"⚠️ *BUY SIGNAL* - Near Break-Even: ${net_ev:.2f} ({ev_percentage:.2f}%)\n"
+                        else:
+                            status_message += f"❌ *NO BUY SIGNAL* - Net EV: ${net_ev:.2f} ({ev_percentage:.2f}%)\n"
+                        
+                        status_message += f"⏰ Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+                        
+                        # Send to all subscribers
+                        await self._send_to_subscribers(subscribers, status_message, parse_mode="Markdown")
                     else:
-                        status_message += f"❌ *NO BUY SIGNAL* - Net EV: ${net_ev:.2f} ({ev_percentage:.2f}%)\n"
-                    
-                    status_message += f"⏰ Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-                    
-                    await self.notifier.send_message(status_message, parse_mode="Markdown")
+                        logger.debug(f"No subscribers for {game_id}, skipping status message")
                 
                 # Get game-specific threshold settings
                 game_min_threshold = game_config.get('min_threshold')
-                game_step_increment = game_config.get('step_increment')
                 threshold_operator = game_config.get('threshold_operator', '>=')
+                
+                # Debug logging before state update
+                if game_id in ['pick_4', 'hot_wins']:
+                    logger.info(f"[{game_id.upper()}] About to call check_threshold with current_jackpot: {current_jackpot}")
                 
                 # Check threshold (only if configured for this game)
                 alert_info = self.threshold_alert.check_threshold(
                     game_id, 
                     current_jackpot,
                     min_threshold=game_min_threshold,
-                    step_increment=game_step_increment,
                     threshold_operator=threshold_operator
                 )
                 
+                # Debug logging after state update
+                if game_id in ['pick_4', 'hot_wins']:
+                    game_state_after = self.threshold_alert._get_game_state(game_id)
+                    logger.info(f"[{game_id.upper()}] After check_threshold, game_state['last_jackpot']: {game_state_after.get('last_jackpot')}")
+                
                 # Only send threshold alert if near draw time (if only_near_draw is True)
-                if alert_info and (not only_near_draw or self._is_near_draw_time(game_id, window_minutes=60)):
-                    # Send threshold alert (separate from status message)
-                    message = self.threshold_alert.get_alert_message(alert_info, game_name)
-                    await self.notifier.send_alert(
-                        "Jackpot Threshold Alert",
-                        message,
-                        "ALERT"
-                    )
+                # Skip if suppress_messages is True (for /status command)
+                if alert_info and (not suppress_messages) and (not only_near_draw or self._is_near_draw_time(game_id, window_minutes=60)):
+                    # Only send to users subscribed to this game
+                    subscribers = self.subscription_manager.get_all_subscribers(game_id)
+                    if subscribers:
+                        # Send threshold alert (separate from status message)
+                        message = self.threshold_alert.get_alert_message(alert_info, game_name)
+                        alert_text = f"🚨 *Jackpot Threshold Alert*\n\n{message}"
+                        await self._send_to_subscribers(subscribers, alert_text, parse_mode="Markdown")
                 
                 # Send buy signal alert if new buy signal logic triggers (only if near draw time)
-                if buy_signal.get('has_signal') and (not only_near_draw or self._is_near_draw_time(game_id, window_minutes=60)):
-                    buy_message = self.buy_signal.format_buy_signal_message(
-                        buy_signal, game_name, current_jackpot, rollover_count, time_to_draw_str
-                    )
-                    
-                    if buy_message:
-                        await self.notifier.send_alert(
-                            "Buy Signal",
-                            buy_message,
-                            "ALERT"
+                # Skip if suppress_messages is True (for /status command)
+                if buy_signal.get('has_signal') and (not suppress_messages) and (not only_near_draw or self._is_near_draw_time(game_id, window_minutes=60)):
+                    # Only send to users subscribed to this game
+                    subscribers = self.subscription_manager.get_all_subscribers(game_id)
+                    if subscribers:
+                        buy_message = self.buy_signal.format_buy_signal_message(
+                            buy_signal, game_name, current_jackpot, rollover_count, time_to_draw_str
                         )
+                        
+                        if buy_message:
+                            await self._send_to_subscribers(subscribers, buy_message, parse_mode="Markdown")
                     
                     # Trigger automation if enabled (only for Lucky Day Lotto and Mega Millions)
                     if self.automation and game_id in ['lucky_day_lotto_midday', 'lucky_day_lotto_evening', 'mega_millions']:
@@ -379,14 +475,13 @@ class LotteryAssistant:
                         await self.automation.setup_purchase_flow(game_name, game_url)
                 # Fallback to legacy buy signal
                 elif is_buy_signal_legacy and (not only_near_draw or self._is_near_draw_time(game_id, window_minutes=60)):
-                    buy_message = f"🛒 *Buy Signal: {game_name}*\n\n"
-                    buy_message += self.ev_calculator.format_ev_message(ev_result, game_name)
-                    
-                    await self.notifier.send_alert(
-                        "Buy Signal",
-                        buy_message,
-                        "ALERT"
-                    )
+                    # Only send to users subscribed to this game
+                    subscribers = self.subscription_manager.get_all_subscribers(game_id)
+                    if subscribers:
+                        buy_message = f"🛒 *Buy Signal: {game_name}*\n\n"
+                        buy_message += self.ev_calculator.format_ev_message(ev_result, game_name)
+                        
+                        await self._send_to_subscribers(subscribers, buy_message, parse_mode="Markdown")
                     
                     # Trigger automation if enabled (only for Lucky Day Lotto and Mega Millions)
                     if self.automation and game_id in ['lucky_day_lotto_midday', 'lucky_day_lotto_evening', 'mega_millions']:
@@ -395,17 +490,39 @@ class LotteryAssistant:
                         await self.automation.setup_purchase_flow(game_name, game_url)
                 
                 results[game_id] = {
+                    'game': game_name,
+                    'jackpot': current_jackpot,
                     'jackpot_data': jackpot_data,
                     'ev_result': ev_result,
                     'alert_sent': alert_info is not None,
                     'buy_signal': buy_signal.get('has_signal', False),
-                    'buy_signal_details': buy_signal
+                    'buy_signal_details': buy_signal,
+                    'timestamp': datetime.now().isoformat()
                 }
             else:
                 logger.warning(f"Could not fetch jackpot for {game_id}")
                 results[game_id] = None
         
         return results
+    
+    async def _send_to_subscribers(self, chat_ids: list, message: str, parse_mode: Optional[str] = None):
+        """
+        Send message to multiple subscribers
+        
+        Args:
+            chat_ids: List of Telegram chat IDs
+            message: Message text to send
+            parse_mode: Optional parse mode
+        """
+        from .telegram_notifier import TelegramNotifier
+        
+        for chat_id in chat_ids:
+            try:
+                # Create a notifier for this specific chat_id
+                notifier = TelegramNotifier(chat_id=chat_id)
+                await notifier.send_message(message, parse_mode=parse_mode)
+            except Exception as e:
+                logger.error(f"Failed to send message to {chat_id}: {e}")
     
     async def check_buy_signal_reminders(self) -> Dict:
         """
@@ -553,12 +670,16 @@ class LotteryAssistant:
         
         status_lines = ["📊 *Current Jackpot Status*\n"]
         
-        # Process games in order: LDL midday, LDL evening, Powerball, Mega Millions
+        # Process games in order: LDL midday, LDL evening, Lotto, Powerball, Mega Millions, Pick 3, Pick 4, Hot Wins
         game_order = [
             'lucky_day_lotto_midday',
             'lucky_day_lotto_evening',
+            'lotto',
             'powerball',
-            'mega_millions'
+            'mega_millions',
+            'pick_3',
+            'pick_4',
+            'hot_wins'
         ]
         
         for game_id in game_order:

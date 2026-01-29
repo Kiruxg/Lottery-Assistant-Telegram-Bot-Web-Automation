@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing - LottoEdge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 0;
+            color: #333;
+        }
+
+        nav {
+            background: #f3f0ff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            line-height: 1;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            margin: 0;
+        }
+
+        .nav-links a {
+            color: #2c3e50;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            font-size: 1em;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+        }
+
+        .nav-btn {
+            background: #667eea;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s ease;
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-btn:hover {
+            background: #5568d3;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+            margin-top: 20px;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .billing-toggle {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin: 30px 0 80px 0;
+            color: white;
+            font-size: 1.1em;
+        }
+
+        .billing-toggle-label {
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+            cursor: pointer;
+        }
+
+        .billing-toggle-label.active {
+            opacity: 1;
+            font-weight: 600;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(30px);
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 0;
+            margin-bottom: 40px;
+        }
+
+        .pricing-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+        }
+
+        .pricing-card.featured {
+            border: 3px solid #fbbf24;
+            transform: scale(1.05);
+        }
+
+        .pricing-card.featured::before {
+            content: "MOST POPULAR";
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fbbf24;
+            color: #78350f;
+            padding: 8px 24px;
+            border-radius: 25px;
+            font-size: 0.85em;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
+            z-index: 10;
+        }
+
+        .plan-name {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .plan-audience {
+            color: #888;
+            margin-bottom: 25px;
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+
+        .price {
+            margin-bottom: 30px;
+        }
+
+        .price-amount {
+            font-size: 3em;
+            font-weight: bold;
+            color: #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .price-period {
+            color: #666;
+            font-size: 0.9em;
+            margin-left: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .price-monthly-equivalent {
+            color: #10b981;
+            font-size: 0.85em;
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        .price-savings {
+            color: #10b981;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .price-strikethrough {
+            text-decoration: line-through;
+            opacity: 0.5;
+            font-size: 0.6em;
+            color: #999;
+            margin-right: 8px;
+        }
+
+        .features {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        .features li {
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+        }
+
+        .features li:last-child {
+            border-bottom: none;
+        }
+
+        .features li::before {
+            content: "✓";
+            color: #10b981;
+            font-weight: bold;
+            margin-right: 12px;
+            font-size: 1.2em;
+        }
+
+        .features li.unavailable {
+            color: #999;
+        }
+
+        .features li.unavailable::before {
+            content: "✗";
+            color: #ef4444;
+        }
+
+        .cta-button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+        }
+
+        .cta-button.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .cta-button.primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .cta-button.secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .cta-button.secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .trust-badges {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+
+        .trust-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .trust-badge::before {
+            content: "✓";
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .faq {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 50px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+
+        .faq h2 {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #2c3e50;
+            font-size: 2em;
+        }
+
+        .faq-category {
+            margin-bottom: 40px;
+        }
+
+        .faq-category-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .faq-category-title::before {
+            font-size: 1.2em;
+        }
+
+        .faq-item {
+            margin-bottom: 12px;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .faq-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+        }
+
+        .faq-question {
+            font-weight: 600;
+            color: #2c3e50;
+            padding: 18px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            background: #f8f9fa;
+            transition: background 0.2s ease;
+        }
+
+        .faq-question:hover {
+            background: #f0f4ff;
+        }
+
+        .faq-question.active {
+            background: #f0f4ff;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .faq-icon {
+            font-size: 1.2em;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .faq-question-text {
+            flex: 1;
+        }
+
+        .faq-toggle {
+            font-size: 1.2em;
+            color: #667eea;
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+            margin-left: 15px;
+        }
+
+        .faq-question.active .faq-toggle {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            color: #555;
+            line-height: 1.7;
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+
+        .faq-answer.active {
+            padding: 18px 20px;
+            max-height: 1000px;
+        }
+
+        .faq-answer strong {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .faq-highlight {
+            background: #fef3c7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #92400e;
+        }
+
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 0.75rem 1rem;
+            }
+
+            .logo {
+                font-size: 1.2em;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .nav-links a {
+                font-size: 0.9em;
+            }
+
+            .nav-btn {
+                padding: 0.4rem 1rem;
+                font-size: 0.85em;
+            }
+
+            .pricing-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .pricing-card.featured {
+                transform: scale(1);
+                order: 2;
+            }
+
+            .pricing-card:first-child {
+                order: 1;
+            }
+
+            .pricing-card:last-child {
+                order: 3;
+            }
+
+            .pricing-card.featured::before {
+                top: -12px;
+                font-size: 0.75em;
+                padding: 6px 16px;
+            }
+
+            .trust-badges {
+                flex-direction: column;
+                gap: 12px;
+                font-size: 0.8em;
+            }
+
+            .pricing-card.featured {
+                transform: scale(1);
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            nav {
+                padding: 0.5rem 0.75rem;
+            }
+
+            .logo {
+                font-size: 1em;
+            }
+
+            .nav-links {
+                gap: 0.75rem;
+            }
+
+            .nav-links a {
+                font-size: 0.8em;
+            }
+
+            .nav-btn {
+                padding: 0.35rem 0.75rem;
+                font-size: 0.75em;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include 'nav.html' %}
+
+    <div class="container">
+        
+        <div class="header">
+            <h1>Simple, Transparent Pricing</h1>
+            <p>Choose the plan that works for you</p>
+        </div>
+
+        <div class="billing-toggle">
+            <span class="billing-toggle-label active" id="monthly-label">Monthly</span>
+            <div class="toggle-switch" id="billing-toggle">
+                <div class="toggle-slider"></div>
+            </div>
+            <span class="billing-toggle-label" id="annual-label">Annual</span>
+            <span style="margin-left: 10px; font-size: 0.9em; opacity: 0.9;">Save up to 17%</span>
+        </div>
+
+        <div class="pricing-grid">
+            <!-- Free Plan -->
+            <div class="pricing-card">
+                <div class="plan-name">Free</div>
+                <div class="plan-audience">For casual players who want to test the waters</div>
+                <div class="price">
+                    <span class="price-amount">$0</span>
+                    <span class="price-period">/month</span>
+                </div>
+                <ul class="features">
+                    <li>Subscribe to 1 game only</li>
+                    <li>Basic EV calculations</li>
+                    <li>Web dashboard access (read-only)</li>
+                    <li>Basic Telegram bot commands</li>
+                    <li>Buy signals for subscribed games</li>
+                    <li class="unavailable">Multiple game subscriptions</li>
+                </ul>
+                <a href="/dashboard" class="cta-button secondary">Get Started Free</a>
+            </div>
+
+            <!-- Premium Plan -->
+            <div class="pricing-card featured">
+                <div class="plan-name">Premium</div>
+                <div class="plan-audience">For active players looking for an edge and real alerts</div>
+                <div class="price">
+                    <div>
+                        <span class="price-strikethrough" id="premium-strikethrough" style="display: none;">$9.99/mo</span>
+                        <span class="price-amount" id="premium-price" data-monthly="9.99" data-annual="99.99" data-monthly-equiv="8.33">$9.99</span>
+                        <span class="price-period" id="premium-period">/month</span>
+                    </div>
+                    <div class="price-monthly-equivalent" id="premium-equiv" style="display: none;">$8.33/mo billed annually</div>
+                    <div class="price-savings" id="premium-savings" style="display: none;">Save $20/year</div>
+                </div>
+                <ul class="features">
+                    <li>Subscribe to ALL games (unlimited)</li>
+                    <li>Unlimited alerts per game</li>
+                    <li>EV-driven buy/skip signals</li>
+                    <li>Custom thresholds per game</li>
+                    <li>Game comparison feature</li>
+                    <li class="unavailable">Purchase automation</li>
+                </ul>
+                <a href="/dashboard" class="cta-button primary">Start Free Trial</a>
+            </div>
+
+            <!-- Pro Plan -->
+            <div class="pricing-card">
+                <div class="plan-name">Pro</div>
+                <div class="plan-audience">For power users who love automation and analyze trends</div>
+                <div class="price">
+                    <div>
+                        <span class="price-strikethrough" id="pro-strikethrough" style="display: none;">$19.99/mo</span>
+                        <span class="price-amount" id="pro-price" data-monthly="19.99" data-annual="199.99" data-monthly-equiv="16.67">$19.99</span>
+                        <span class="price-period" id="pro-period">/month</span>
+                    </div>
+                    <div class="price-monthly-equivalent" id="pro-equiv" style="display: none;">$16.67/mo billed annually</div>
+                    <div class="price-savings" id="pro-savings" style="display: none;">Save $40/year</div>
+                </div>
+                <ul class="features">
+                    <li>Everything in Premium</li>
+                    <li>Purchase automation</li>
+                    <li>Advanced analytics & historical charts</li>
+                    <li>Data export (CSV/JSON)</li>
+                    <li>Unlimited history</li>
+                </ul>
+                <a href="/dashboard" class="cta-button primary">Start Free Trial</a>
+            </div>
+        </div>
+
+        <!-- Trust Badges -->
+        <div class="trust-badges">
+            <div class="trust-badge">No credit card required</div>
+            <div class="trust-badge">Cancel anytime</div>
+            <div class="trust-badge">Secure and private</div>
+            <div class="trust-badge">Backed by real EV math</div>
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="faq">
+            <h2>Frequently Asked Questions</h2>
+            
+            <!-- Features & Plans -->
+            <div class="faq-category">
+                <div class="faq-category-title">🎯 Features & Plans</div>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span class="faq-icon">🎯</span>
+                        <span class="faq-question-text">What's the difference between Free and Premium?</span>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <strong>Free</strong> lets you monitor one game with core features.<br>
+                        <strong>Premium</strong> unlocks all games, value alerts, and buy signals.<br>
+                        <strong>Pro</strong> adds advanced analytics and optional automation features.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span class="faq-icon">🎯</span>
+                        <span class="faq-question-text">What are buy signals?</span>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Buy signals highlight drawings that have better expected value based on factors like jackpot size, rollover streaks, and draw timing. They help you avoid low-value drawings and spot better opportunities.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span class="faq-icon">🎯</span>
+                        <span class="faq-question-text">Which lotteries are supported?</span>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        We currently support <strong>Mega Millions</strong>, <strong>Powerball</strong>, and state lotteries including <strong>IL Lucky Day Lotto</strong>. More games are being added regularly.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span class="faq-icon">🎯</span>
+                        <span class="faq-question-text">Who is this for?</span>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        This works well for:<br>
+                        • <strong>Casual players</strong> who don't want to waste money<br>
+                        • <strong>Data-minded players</strong> who want deeper insights<br>
+                        • <strong>Syndicates or groups</strong> managing pooled tickets
+                    </div>
+                </div>
+            </div>
+
+            <!-- Billing & Payments -->
+            <div class="faq-category">
+                <div class="faq-category-title">💳 Billing & Payments</div>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span class="faq-icon">💳</span>
+                        <span class="faq-question-text">Can I cancel anytime?</span>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Yes! You can <span class="faq-highlight">cancel whenever you like</span>. You'll keep access until the end of your billing period, <strong>no strings attached</strong>.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span class="faq-icon">💳</span>
+                        <span class="faq-question-text">Is there a free trial?</span>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Yes! The <span class="faq-highlight">Free tier is always available</span>. Premium and Pro plans include a <span class="faq-highlight">7-day free trial with no credit card required</span>.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span class="faq-icon">💳</span>
+                        <span class="faq-question-text">Do you store my payment information?</span>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        No. Payments are handled securely by <strong>Stripe</strong>. We <span class="faq-highlight">never see or store your full payment details</span>.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span class="faq-icon">💳</span>
+                        <span class="faq-question-text">Do you offer refunds?</span>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        We offer refunds within 30 days of purchase if you're not satisfied. Contact support for assistance.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security & Privacy -->
+            <div class="faq-category">
+                <div class="faq-category-title">🔐 Security & Privacy</div>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span class="faq-icon">🔐</span>
+                        <span class="faq-question-text">Is this legal?</span>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Yes. We don't sell or resell lottery tickets. We provide analytics, alerts, and optional automation tools that help you play more efficiently.
+                    </div>
+                </div>
+            </div>
+
+            <!-- How it Works -->
+            <div class="faq-category">
+                <div class="faq-category-title">🧠 How it Works</div>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span class="faq-icon">🧠</span>
+                        <span class="faq-question-text">Will this help me win the lottery?</span>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        No system can guarantee wins. Our tools help you make smarter decisions, avoid low-value drawings, and understand expected value — <strong>not predict numbers</strong>.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span class="faq-icon">🧠</span>
+                        <span class="faq-question-text">Does this encourage gambling?</span>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Our goal is to help users reduce waste, understand value, and play <strong>responsibly</strong> — not to promote excessive gambling.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const billingToggle = document.getElementById('billing-toggle');
+        const monthlyLabel = document.getElementById('monthly-label');
+        const annualLabel = document.getElementById('annual-label');
+        const priceAmounts = document.querySelectorAll('.price-amount');
+        const pricePeriods = document.querySelectorAll('.price-period');
+        const priceSavings = document.querySelectorAll('.price-savings');
+        
+        let isAnnual = false;
+
+        function updateBilling(annual) {
+            isAnnual = annual;
+            billingToggle.classList.toggle('active', isAnnual);
+            monthlyLabel.classList.toggle('active', !isAnnual);
+            annualLabel.classList.toggle('active', isAnnual);
+
+            // Update Premium pricing
+            const premiumPrice = document.getElementById('premium-price');
+            const premiumPeriod = document.getElementById('premium-period');
+            const premiumStrikethrough = document.getElementById('premium-strikethrough');
+            const premiumEquiv = document.getElementById('premium-equiv');
+            const premiumSavings = document.getElementById('premium-savings');
+
+            if (isAnnual) {
+                premiumPrice.textContent = `$${parseFloat(premiumPrice.dataset.annual).toFixed(2)}`;
+                premiumPeriod.textContent = '/year';
+                premiumStrikethrough.style.display = 'inline';
+                premiumEquiv.style.display = 'block';
+                premiumSavings.style.display = 'block';
+            } else {
+                premiumPrice.textContent = `$${parseFloat(premiumPrice.dataset.monthly).toFixed(2)}`;
+                premiumPeriod.textContent = '/month';
+                premiumStrikethrough.style.display = 'none';
+                premiumEquiv.style.display = 'none';
+                premiumSavings.style.display = 'none';
+            }
+
+            // Update Pro pricing
+            const proPrice = document.getElementById('pro-price');
+            const proPeriod = document.getElementById('pro-period');
+            const proStrikethrough = document.getElementById('pro-strikethrough');
+            const proEquiv = document.getElementById('pro-equiv');
+            const proSavings = document.getElementById('pro-savings');
+
+            if (isAnnual) {
+                proPrice.textContent = `$${parseFloat(proPrice.dataset.annual).toFixed(2)}`;
+                proPeriod.textContent = '/year';
+                proStrikethrough.style.display = 'inline';
+                proEquiv.style.display = 'block';
+                proSavings.style.display = 'block';
+            } else {
+                proPrice.textContent = `$${parseFloat(proPrice.dataset.monthly).toFixed(2)}`;
+                proPeriod.textContent = '/month';
+                proStrikethrough.style.display = 'none';
+                proEquiv.style.display = 'none';
+                proSavings.style.display = 'none';
+            }
+        }
+
+        billingToggle.addEventListener('click', function() {
+            updateBilling(!isAnnual);
+        });
+
+        monthlyLabel.addEventListener('click', function() {
+            updateBilling(false);
+        });
+
+        annualLabel.addEventListener('click', function() {
+            updateBilling(true);
+        });
+
+        // FAQ Accordion Functionality
+        function toggleFaq(element) {
+            const faqItem = element.closest('.faq-item');
+            const question = faqItem.querySelector('.faq-question');
+            const answer = faqItem.querySelector('.faq-answer');
+            
+            const isActive = question.classList.contains('active');
+            
+            // Close all other FAQs
+            document.querySelectorAll('.faq-item').forEach(item => {
+                if (item !== faqItem) {
+                    item.querySelector('.faq-question').classList.remove('active');
+                    item.querySelector('.faq-answer').classList.remove('active');
+                }
+            });
+            
+            // Toggle current FAQ
+            if (isActive) {
+                question.classList.remove('active');
+                answer.classList.remove('active');
+            } else {
+                question.classList.add('active');
+                answer.classList.add('active');
+            }
+        }
+
+    </script>
+</body>
+</html>

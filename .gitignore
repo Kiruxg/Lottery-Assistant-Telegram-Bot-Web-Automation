@@ -29,6 +29,8 @@ wheels/
 # State and logs
 lottery_state.json
 *.log
+user_subscriptions.json
+buy_signals_log.json
 
 # IDE
 .vscode/
